@@ -36,3 +36,13 @@ Make sure to deploy the output of `remix build`
 
 - `build/`
 - `public/build/`
+
+### Fly.io
+
+Using fly.io for deploys - https://fly.io/docs/apps/deploy/
+
+```sh
+fly deploy
+```
+
+Edit the fly.toml file to make changes to the setup.
