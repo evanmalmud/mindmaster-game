@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "remix build",
+    "build:css": "tailwindcss -m -i ./styles/app.css -o app/styles/app.css",
     "dev": "remix dev --manual",
+    "dev:css": "tailwindcss -w -o ./app/styles/app.css",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "remix-serve ./build/index.js",
     "typecheck": "tsc"
