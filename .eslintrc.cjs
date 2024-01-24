@@ -67,9 +67,45 @@ module.exports = {
       },
       extends: [
         "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/stylistic",
         "plugin:import/recommended",
         "plugin:import/typescript",
       ],
+      rules: {
+        "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+        "func-style": ["error", "declaration"],
+        "import/order": [
+          "error",
+          {
+            alphabetize: { caseInsensitive: true, order: "asc" },
+            groups: ["builtin", "external", "internal", "parent", "sibling"],
+            "newlines-between": "always",
+          },
+        ],
+      },
+    },
+
+    // Jest/Vitest
+    {
+      files: ["**/*.test.{js,jsx,ts,tsx}"],
+      plugins: ["jest", "jest-dom", "testing-library"],
+      extends: [
+        "plugin:jest/recommended",
+        "plugin:jest-dom/recommended",
+        "plugin:testing-library/react",
+        "prettier",
+      ],
+      env: {
+        "jest/globals": true,
+      },
+      settings: {
+        jest: {
+          // we're using vitest which has a very similar API to jest
+          // (so the linting plugins work nicely), but it means we have to explicitly
+          // set the jest version.
+          version: 28,
+        },
+      },
     },
 
     // Node
