@@ -61,10 +61,6 @@ fly proxy 5432 -a plot-points-db
 
 https://console.cloud.google.com/apis/credentials?project=plotpoints
 
-
-
-
-
 ## Resouces Used
 
 https://github.com/ShubhamVerma1811/remix-prisma-auth0-starter
