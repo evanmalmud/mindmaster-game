@@ -14,13 +14,19 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@prisma/client": "^5.8.1",
     "@remix-run/css-bundle": "^2.5.1",
     "@remix-run/node": "^2.5.1",
     "@remix-run/react": "^2.5.1",
     "@remix-run/serve": "^2.5.1",
+    "bcryptjs": "^2.4.3",
     "isbot": "^4.1.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "remix-auth": "^3.6.0",
+    "remix-auth-auth0": "^1.9.0",
+    "remix-auth-google": "^2.0.0",
+    "remix-auth-oauth2": "^1.11.1"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.0",
@@ -51,6 +57,7 @@
     "prettier": "^3.2.4",
     "prettier-plugin-organize-imports": "^3.2.4",
     "prettier-plugin-tailwindcss": "^0.5.11",
+    "prisma": "^5.8.1",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.1.6",
     "vite": "^5.0.12",

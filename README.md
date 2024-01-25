@@ -46,3 +46,11 @@ fly deploy
 ```
 
 Edit the fly.toml file to make changes to the setup.
+
+## DB - Using Fly Postgres
+
+Proxy DB from flyway to local:5432
+
+```sh
+fly proxy 5432 -a plot-points-db
+```
