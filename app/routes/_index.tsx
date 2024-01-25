@@ -1,22 +1,20 @@
 import { Link, useLoaderData } from "@remix-run/react";
-import { json } from "@remix-run/node";
 import type { LoaderFunction } from "@remix-run/node";
 import { authenticator } from "~/services/auth.server";
-
 
 export function meta() {
   return [
     { title: "New Remix App" },
     { name: "description", content: "Welcome to Remix!" },
   ];
-};
+}
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await authenticator.isAuthenticated(request, {
     failureRedirect: "/login",
   });
   return user;
-};
+}
 
 export default function Index() {
   const user = useLoaderData();
@@ -28,8 +26,8 @@ export default function Index() {
           <Link className="text-white text-3xl font-bold" to={"/"}>Plot Points</Link>
           <div className="flex flex-col md:flex-row items-center justify-between gap-x-4 text-blue-50">
 
-          <h1>Welcome to Remix</h1>
-          <h1>Logged in as ...</h1>
+            <h1>Welcome to Remix</h1>
+            <h1>Logged in as ...</h1>
 
             <Link to={"login"}>Login</Link>
             <Link to={"login"}>Register</Link>
