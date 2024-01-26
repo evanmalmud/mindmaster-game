@@ -54,5 +54,4 @@ COPY --from=build /app/package.json /app/package.json
 COPY --from=build /app/prisma /app/prisma
 
 # Start the server by default, this can be overwritten at runtime
-EXPOSE 3000
-CMD [ "npm", "run", "start" ]
+ENTRYPOINT [ "./start.sh" ]

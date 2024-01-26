@@ -57,6 +57,14 @@ Proxy DB from flyway to local:5432
 fly proxy 5432 -a plot-points-db
 ```
 
+## DB - Prisma
+
+To create a new migration run
+
+```sh
+npm run db:migrate  -- <migration_name>
+```
+
 ## Google Auth
 
 https://console.cloud.google.com/apis/credentials?project=plotpoints

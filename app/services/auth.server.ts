@@ -1,12 +1,12 @@
 // app/utils/auth.server.ts
-import { Authenticator } from "remix-auth";
-import { Auth0Strategy } from "remix-auth-auth0";
-import { GoogleStrategy } from "remix-auth-google";
-import { z } from "zod";
+import { Authenticator } from 'remix-auth';
+import { Auth0Strategy } from 'remix-auth-auth0';
+import { GoogleStrategy } from 'remix-auth-google';
+import { z } from 'zod';
 
-import { sessionStorage } from "~/services/session.server";
+import { sessionStorage } from '~/services/session.server';
 
-import { db as prisma } from "./db.server";
+import { db as prisma } from './db.server';
 
 // Create an instance of the authenticator, pass a generic (optional) with what your
 // strategies will return and will be stored in the session
@@ -21,7 +21,7 @@ const auth0Strategy = new Auth0Strategy(
     domain: process.env.AUTH0_DOMAIN_URL!,
   },
   async ({ profile }) => {
-    const email = profile.emails?.[0].value ?? "";
+    const email = profile.emails?.[0].value ?? '';
     // Get the user data from your DB or API using the tokens and profile
     return prisma.user.upsert({
       where: {
@@ -62,9 +62,12 @@ const googleStrategy = new GoogleStrategy(
       },
       create: {
         email,
-        name: profile.displayName!,
+        name: profile.displayName,
       },
-      update: {},
+      update: {
+        email,
+        name: profile.displayName,
+      },
     });
   },
 );

@@ -6,6 +6,7 @@
   "scripts": {
     "build": "remix build",
     "build:css": "tailwindcss -m -i ./styles/app.css -o app/styles/app.css",
+    "db:migrate": "prisma migrate dev --name",
     "dev": "remix dev --manual",
     "format": "prettier --write .",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
