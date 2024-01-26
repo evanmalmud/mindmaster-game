@@ -8,6 +8,9 @@ primary_region = "ewr"
 
 [build]
 
+[deploy]
+release_command = "bash ./scripts/migrate.sh"
+
 [http_service]
   internal_port = 3000
   force_https = true
