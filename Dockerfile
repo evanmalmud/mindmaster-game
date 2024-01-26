@@ -1,6 +1,6 @@
 # Adjust NODE_VERSION as desired
 ARG NODE_VERSION=20.11.0
-FROM node:${NODE_VERSION}-slim as base
+FROM node:${NODE_VERSION}-bullseye-slim as base
 
 # Set production environment for base and all layers that inherit it
 ENV NODE_ENV="production"
