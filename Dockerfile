@@ -54,5 +54,5 @@ COPY --from=build /app/package.json /app/package.json
 COPY --from=build /app/start.sh /app/start.sh
 COPY --from=build /app/prisma /app/prisma
 
-RUN chmod +x /myapp/start.sh
+RUN chmod +x /app/start.sh
 ENTRYPOINT [ "./start.sh" ]
