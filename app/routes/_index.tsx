@@ -1,5 +1,6 @@
+import type { LoaderFunctionArgs } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
-import type { LoaderFunction } from '@remix-run/node';
+
 import { authenticator } from '~/services/auth.server';
 
 export function meta() {
@@ -9,15 +10,17 @@ export function meta() {
   ];
 }
 
-export const loader: LoaderFunction = async ({ request }) => {
+export async function loader({ request }: LoaderFunctionArgs) {
   const user = await authenticator.isAuthenticated(request, {
     failureRedirect: '/login',
   });
   return user;
-};
+}
 
 export default function Index() {
   const user = useLoaderData();
+  console.log(user);
+
   return (
     <div>
       <nav className="fixed left-0 top-0 w-full bg-gradient-to-br from-purple-400 via-purple-500 to-purple-500 px-5">
