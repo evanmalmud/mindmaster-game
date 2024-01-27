@@ -96,7 +96,8 @@ export default function Index() {
                   <div className="relative overflow-hidden rounded-xl">
                     <img
                       alt={book.volumeInfo.title}
-                      src={book.volumeInfo.imageLinks.thumbnail}
+                      // src={book.volumeInfo.imageLinks.thumbnail}
+                      src={`https://books.google.com/books/publisher/content/images/frontcover/${book.id}?fife=w800-h1200&source=gbs_api`}
                       className="z-1 h-40 w-full rounded-lg object-cover"
                     />
                   </div>
