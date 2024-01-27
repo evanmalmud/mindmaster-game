@@ -1,4 +1,5 @@
 // app/utils/auth.server.ts
+import type { User } from '@prisma/client';
 import { Authenticator } from 'remix-auth';
 import { Auth0Strategy } from 'remix-auth-auth0';
 import { GoogleStrategy } from 'remix-auth-google';
@@ -11,7 +12,7 @@ import { db as prisma } from './db.server';
 // Create an instance of the authenticator, pass a generic (optional) with what your
 // strategies will return and will be stored in the session
 
-export const authenticator = new Authenticator(sessionStorage);
+export const authenticator = new Authenticator<User>(sessionStorage);
 
 const auth0Strategy = new Auth0Strategy(
   {

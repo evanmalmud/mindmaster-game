@@ -1,7 +1,30 @@
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
+import { MenuIcon } from 'lucide-react';
+import { z } from 'zod';
 
+import { Avatar, AvatarFallback } from '~/components/ui/avatar';
+import { Card, CardContent, CardTitle } from '~/components/ui/card';
+import { Drawer, DrawerContent, DrawerTrigger } from '~/components/ui/drawer';
 import { authenticator } from '~/services/auth.server';
+
+type GoogleBook = {
+  id: string;
+  volumeInfo: {
+    authors: string[];
+    imageLinks: {
+      smallThumbnail: string;
+      thumbnail: string;
+    };
+    title: string;
+  };
+};
+
+type GoogleBookApiResponse = {
+  items: GoogleBook[];
+  kind: string;
+  totalItems: number;
+};
 
 export function meta() {
   return [
@@ -14,43 +37,81 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const user = await authenticator.isAuthenticated(request, {
     failureRedirect: '/login',
   });
-  return user;
+
+  const secrets = z
+    .object({
+      GOOGLE_API_KEY: z.string(),
+    })
+    .parse(process.env);
+
+  const res = await fetch(
+    `https://www.googleapis.com/books/v1/volumes?q=harry-potter&key=${secrets.GOOGLE_API_KEY}`,
+  );
+
+  if (!res.ok) {
+    throw new Error('OOF');
+  }
+
+  const data = (await res.json()) as GoogleBookApiResponse;
+
+  return { books: data.items, user };
 }
 
 export default function Index() {
-  const user = useLoaderData();
-  console.log(user);
+  const { books, user } = useLoaderData<typeof loader>();
 
   return (
-    <div>
-      <nav className="fixed left-0 top-0 w-full bg-gradient-to-br from-purple-400 via-purple-500 to-purple-500 px-5">
-        <div className="mx-auto flex w-full max-w-screen-lg content-center justify-between py-3 ">
-          <Link className="text-3xl font-bold text-white" to={'/'}>
-            Plot Points
-          </Link>
-          <div className="flex flex-col items-center justify-between gap-x-4 text-blue-50 md:flex-row">
-            <h1>Welcome to Remix</h1>
-            <h1>Logged in as ...</h1>
-
-            <Link to={'login'}>Login</Link>
-            <Link to={'login'}>Register</Link>
-          </div>
+    <>
+      <header className="z-header border-theme-divider-tertiary bg-theme-bg-primary tablet:px-8 relative flex h-14 flex-row items-center justify-between gap-3 border-b px-4 py-3 sm:sticky sm:left-0 sm:top-0 sm:w-full sm:flex-row sm:px-4">
+        <div className="lg:hidden">
+          <Drawer direction="left">
+            <DrawerTrigger>
+              <MenuIcon />
+            </DrawerTrigger>
+            <DrawerContent className="fixed bottom-0 right-0 mt-24 flex h-full w-80 flex-col rounded-none">
+              TODO
+            </DrawerContent>
+          </Drawer>
         </div>
-      </nav>
-      <div className="grid grid-cols-1 lg:grid-flow-row lg:grid-cols-3">
-        <figure className="m-4 px-4 py-10 shadow-md shadow-sky-100">
-          <blockquote cite="https://wisdomman.com" className="py-3">
-            <p className="text-xl  text-gray-800">
-              A stitch in Time saves Nine.
-            </p>
-          </blockquote>
-          <figcaption>
-            <cite className="text-md mb-4 text-right text-gray-600">
-              - Unknown
-            </cite>
-          </figcaption>
-        </figure>
-      </div>
-    </div>
+
+        <Link className="font-bold" to="/">
+          Plot Points
+        </Link>
+
+        <div className="flex items-center gap-x-4">
+          <Link to="/logout">Logout</Link>
+          <Avatar className="border border-neutral-50 bg-purple-400">
+            <AvatarFallback>{user.name[0]}</AvatarFallback>
+          </Avatar>
+        </div>
+      </header>
+
+      <main className="flex flex-row lg:pl-60">
+        <aside className="bg-theme-bg-primary border-theme-divider-tertiary group fixed left-0 top-0 hidden h-full flex-col border-r transition-[width,transform] duration-300 ease-in-out lg:top-14 lg:flex lg:h-[calc(100vh-theme(space.14))] lg:w-60  lg:-translate-x-0 "></aside>
+        <div className="relative mx-auto grid max-w-xs flex-1 grid-cols-1 items-start gap-8 px-6 pb-16 pt-10 md:max-w-xl md:grid-cols-2 lg:max-w-full lg:grid-cols-3 lg:px-16 xl:grid-cols-4 ">
+          {books.map((book) => {
+            return (
+              <Card key={book.id} className="h-full max-h-96">
+                <CardContent className="pt-6">
+                  <div className="relative overflow-hidden rounded-xl">
+                    <img
+                      alt={book.volumeInfo.title}
+                      src={book.volumeInfo.imageLinks.thumbnail}
+                      className="z-1 h-40 w-full rounded-lg object-cover"
+                    />
+                  </div>
+                  <CardTitle className="mt-4">
+                    {book.volumeInfo.title}
+                  </CardTitle>
+                  <h5 className="mt-2 text-sm text-neutral-500">
+                    {book.volumeInfo.authors[0]}
+                  </h5>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </main>
+    </>
   );
 }
