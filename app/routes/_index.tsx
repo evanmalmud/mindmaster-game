@@ -1,118 +1,138 @@
-import type { LoaderFunctionArgs } from '@remix-run/node';
-import { Link, useLoaderData } from '@remix-run/react';
-import { MenuIcon } from 'lucide-react';
-import { z } from 'zod';
-
-import { Avatar, AvatarFallback } from '~/components/ui/avatar';
-import { Card, CardContent, CardTitle } from '~/components/ui/card';
-import { Drawer, DrawerContent, DrawerTrigger } from '~/components/ui/drawer';
-import { authenticator } from '~/services/auth.server';
-
-type GoogleBook = {
-  id: string;
-  volumeInfo: {
-    authors: string[];
-    imageLinks: {
-      smallThumbnail: string;
-      thumbnail: string;
-    };
-    title: string;
-  };
-};
-
-type GoogleBookApiResponse = {
-  items: GoogleBook[];
-  kind: string;
-  totalItems: number;
-};
+import { motion } from 'framer-motion';
+import { useState } from 'react';
+import type { HTMLAttributes } from 'react';
 
 export function meta() {
   return [
-    { title: 'New Remix App' },
-    { name: 'description', content: 'Welcome to Remix!' },
+    { title: 'Mastermind' },
+    { name: 'description', content: 'Break the code...' },
   ];
 }
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  const user = await authenticator.isAuthenticated(request, {
-    failureRedirect: '/login',
-  });
+const subtitlePhrases = [
+  [
+    ['g', 'u', 'e', 's', 's'],
+    ['t', 'h', 'e'],
+    ['c', 'o', 'l', 'o', 'r', 's'],
+  ],
+  [
+    ['b', 'r', 'e', 'a', 'k'],
+    ['t', 'h', 'e'],
+    ['c', 'o', 'd', 'e'],
+  ],
+];
 
-  const secrets = z
-    .object({
-      GOOGLE_API_KEY: z.string(),
-    })
-    .parse(process.env);
-
-  const res = await fetch(
-    `https://www.googleapis.com/books/v1/volumes?q=harry-potter&key=${secrets.GOOGLE_API_KEY}`,
-  );
-
-  if (!res.ok) {
-    throw new Error('OOF');
-  }
-
-  const data = (await res.json()) as GoogleBookApiResponse;
-
-  return { books: data.items, user };
-}
+const subtitleColors = [
+  'bg-red-400',
+  'bg-yellow-400',
+  'bg-green-400',
+  'bg-blue-400',
+  'bg-purple-400',
+  'bg-orange-400',
+];
 
 export default function Index() {
-  const { books, user } = useLoaderData<typeof loader>();
+  const [subtitleIndex, setSubtitleIndex] = useState(0);
+  const subtitle = subtitlePhrases[subtitleIndex];
 
   return (
-    <>
-      <header className="z-header border-theme-divider-tertiary bg-theme-bg-primary tablet:px-8 relative flex h-14 flex-row items-center justify-between gap-3 border-b px-4 py-3 sm:sticky sm:left-0 sm:top-0 sm:w-full sm:flex-row sm:px-4">
-        <div className="lg:hidden">
-          <Drawer direction="left">
-            <DrawerTrigger>
-              <MenuIcon />
-            </DrawerTrigger>
-            <DrawerContent className="fixed bottom-0 right-0 mt-24 flex h-full w-80 flex-col rounded-none">
-              TODO
-            </DrawerContent>
-          </Drawer>
-        </div>
+    <main className="flex min-h-dvh flex-col items-center justify-center">
+      <div className="flex w-full max-w-md flex-col items-center lg:max-w-lg">
+        <motion.h1
+          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 100 }}
+          transition={{ duration: 0.5 }}
+          className="font-display text-6xl uppercase"
+        >
+          Mastermind
+        </motion.h1>
 
-        <Link className="font-bold" to="/">
-          Plot Points
-        </Link>
+        <div className="mt-4 flex w-full max-w-xs flex-wrap justify-center gap-4">
+          {subtitle.map((word, wordIdx) => {
+            const isLastWord = wordIdx === subtitle.length - 1;
 
-        <div className="flex items-center gap-x-4">
-          <Link to="/logout">Logout</Link>
-          <Avatar className="border border-neutral-50 bg-purple-400">
-            <AvatarFallback>{user.name[0]}</AvatarFallback>
-          </Avatar>
-        </div>
-      </header>
-
-      <main className="flex flex-row lg:pl-60">
-        <aside className="bg-theme-bg-primary border-theme-divider-tertiary group fixed left-0 top-0 hidden h-full flex-col border-r transition-[width,transform] duration-300 ease-in-out lg:top-14 lg:flex lg:h-[calc(100vh-theme(space.14))] lg:w-60  lg:-translate-x-0 "></aside>
-        <div className="relative mx-auto grid max-w-xs flex-1 grid-cols-1 items-start gap-8 px-6 pb-16 pt-10 md:max-w-xl md:grid-cols-2 lg:max-w-full lg:grid-cols-3 lg:px-16 xl:grid-cols-4 ">
-          {books.map((book) => {
             return (
-              <Card key={book.id} className="h-full max-h-96">
-                <CardContent className="pt-6">
-                  <div className="relative overflow-hidden rounded-xl">
-                    <img
-                      alt={book.volumeInfo.title}
-                      // src={book.volumeInfo.imageLinks.thumbnail}
-                      src={`https://books.google.com/books/publisher/content/images/frontcover/${book.id}?fife=w800-h1200&source=gbs_api`}
-                      className="z-1 h-40 w-full rounded-lg object-cover"
-                    />
-                  </div>
-                  <CardTitle className="mt-4">
-                    {book.volumeInfo.title}
-                  </CardTitle>
-                  <h5 className="mt-2 text-sm text-neutral-500">
-                    {book.volumeInfo.authors[0]}
-                  </h5>
-                </CardContent>
-              </Card>
+              <div key={wordIdx} className="flex gap-1">
+                {word.map((letter, letterIdx) => {
+                  const isLastLetter =
+                    isLastWord && letterIdx === word.length - 1;
+
+                  return (
+                    <motion.div
+                      key={letterIdx}
+                      aria-hidden
+                      layoutId={`${wordIdx}-${letterIdx}`}
+                      animate={{
+                        rotateY: subtitleIndex ? 360 : 720,
+                      }}
+                      initial={{
+                        rotateY: 180,
+                      }}
+                      transition={{
+                        delay: 0.75 + letterIdx * 0.1,
+                        duration: 0.75,
+                        repeat: subtitleIndex ? 0 : 1,
+                        repeatDelay: 2,
+                        repeatType: 'reverse',
+                      }}
+                      style={{
+                        backfaceVisibility: 'hidden',
+                        perspective: 1000,
+                        transformStyle: 'preserve-3d',
+                      }}
+                      onAnimationComplete={
+                        isLastLetter ? () => setSubtitleIndex(1) : undefined
+                      }
+                      className={`font-display flex h-6 w-6 items-center justify-center rounded-full uppercase ${subtitleColors[letterIdx % subtitleColors.length]}`}
+                    >
+                      {letter}
+                    </motion.div>
+                  );
+                })}
+              </div>
             );
           })}
         </div>
-      </main>
-    </>
+
+        <div className="mt-16 grid grid-cols-1 items-center gap-8 lg:grid-cols-3">
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 100 }}
+            transition={{
+              type: 'spring',
+              mass: 2,
+              stiffness: 100,
+            }}
+          >
+            <Button>How To Play</Button>
+          </motion.div>
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 100 }}
+            transition={{ delay: 0.2, type: 'spring', mass: 2, stiffness: 100 }}
+          >
+            <Button>Log In</Button>
+          </motion.div>
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 100 }}
+            transition={{ delay: 0.4, type: 'spring', mass: 2, stiffness: 100 }}
+          >
+            <Button>Play</Button>
+          </motion.div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function Button({ children, ...props }: HTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      {...props}
+      className="font-matter hover:shadow-input-grow active:shadow-input-shrink shadow-input-idle group flex h-[60px] w-full items-center justify-center whitespace-nowrap rounded-3xl border-2 border-neutral-700 px-8 py-4 text-sm font-semibold uppercase leading-none transition-all duration-150 ease-in-out will-change-transform hover:translate-y-[-2px] active:translate-y-[2px] active:duration-100"
+    >
+      {children}
+    </button>
   );
 }

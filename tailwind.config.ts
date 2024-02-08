@@ -11,6 +11,9 @@ export default {
         '2xl': '1400px',
       },
     },
+    fontFamily: {
+      display: ['"Protest Strike"', 'sans-serif'],
+    },
     extend: {
       colors: {
         border: 'hsl(var(--border))',
@@ -51,6 +54,11 @@ export default {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+      },
+      boxShadow: {
+        'input-idle': '0 0 #0000, 0 0 #0000, 0px 4px 0px #141414',
+        'input-shrink': '0 0 #0000, 0 0 #0000, 0px 2px 0px #141414',
+        'input-grow': '0 0 #0000, 0 0 #0000, 0px 6px 0px #141414',
       },
       keyframes: {
         'accordion-down': {

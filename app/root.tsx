@@ -13,6 +13,12 @@ import styles from '~/tailwind.css';
 
 export function links(): ReturnType<LinksFunction> {
   return [
+    { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+    { rel: 'preconnect', href: 'https://fonts.gstatic.com' },
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Protest+Strike&display=swap',
+    },
     { rel: 'stylesheet', href: styles },
     ...(cssBundleHref ? [{ rel: 'stylesheet', href: cssBundleHref }] : []),
   ];
