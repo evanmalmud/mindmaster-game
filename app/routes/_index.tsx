@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import type { HTMLAttributes } from 'react';
+import type { ComponentProps, HTMLAttributes } from 'react';
+import { Link } from '@remix-run/react';
 
 export function meta() {
   return [
-    { title: 'Mastermind' },
+    { title: 'MindMaster' },
     { name: 'description', content: 'Break the code...' },
   ];
 }
@@ -13,7 +14,7 @@ const subtitlePhrases = [
   [
     ['g', 'u', 'e', 's', 's'],
     ['t', 'h', 'e'],
-    ['c', 'o', 'l', 'o', 'r', 's'],
+    ['c', 'o', 'l', 'o', 'u', 'r', 's'],
   ],
   [
     ['b', 'r', 'e', 'a', 'k'],
@@ -104,21 +105,21 @@ export default function Index() {
               stiffness: 100,
             }}
           >
-            <Button>How To Play</Button>
+            <Button to={'/gamescreen'}>How To Play</Button>
           </motion.div>
           <motion.div
             animate={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 100 }}
             transition={{ delay: 0.2, type: 'spring', mass: 2, stiffness: 100 }}
           >
-            <Button>Log In</Button>
+            <Button to={'/login'}>Log In</Button>
           </motion.div>
           <motion.div
             animate={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 100 }}
             transition={{ delay: 0.4, type: 'spring', mass: 2, stiffness: 100 }}
           >
-            <Button>Play</Button>
+            <Button to={'/gamescreen'}>Play</Button>
           </motion.div>
         </div>
       </div>
@@ -126,13 +127,13 @@ export default function Index() {
   );
 }
 
-function Button({ children, ...props }: HTMLAttributes<HTMLButtonElement>) {
+function Button({ children, ...props }: ComponentProps<typeof Link>) {
   return (
-    <button
+    <Link
       {...props}
       className="font-matter hover:shadow-input-grow active:shadow-input-shrink shadow-input-idle group flex h-[60px] w-full items-center justify-center whitespace-nowrap rounded-3xl border-2 border-neutral-700 px-8 py-4 text-sm font-semibold uppercase leading-none transition-all duration-150 ease-in-out will-change-transform hover:translate-y-[-2px] active:translate-y-[2px] active:duration-100"
     >
       {children}
-    </button>
+    </Link>
   );
 }
