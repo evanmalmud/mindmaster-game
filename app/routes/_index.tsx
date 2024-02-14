@@ -105,7 +105,7 @@ export default function Index() {
               stiffness: 100,
             }}
           >
-            <Button to={'/gamescreen'}>How To Play</Button>
+            <Button to={'/game'}>How To Play</Button>
           </motion.div>
           <motion.div
             animate={{ opacity: 1, y: 0 }}
@@ -119,7 +119,7 @@ export default function Index() {
             initial={{ opacity: 0, y: 100 }}
             transition={{ delay: 0.4, type: 'spring', mass: 2, stiffness: 100 }}
           >
-            <Button to={'/gamescreen'}>Play</Button>
+            <Button to={'/game'}>Play</Button>
           </motion.div>
         </div>
       </div>
