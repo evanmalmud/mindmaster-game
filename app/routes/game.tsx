@@ -7,6 +7,7 @@ import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { authenticator } from '~/services/auth.server';
 import { getUniqueCode } from '~/lib/code';
+import { GameRow } from '~/components/ui/gamerow';
 
 export function loader() {
   const code = getUniqueCode();
@@ -31,15 +32,25 @@ export default function GameScreen() {
 
         <div>{code.toString()}</div>
 
-        <div
-          className={`box-border flex min-h-96 min-w-full flex-col rounded border-solid  border-black bg-black`}
+        <Card
+          className={`box-border flex min-h-96 min-w-full flex-col rounded border-solid border-black bg-white`}
         >
-          <div className={'flex-1'}>01</div>
-          <div className={'flex-1'}>02</div>
-          <div className={'flex-1'}>03</div>
-          <div className={'flex-1'}>04</div>
-          <div className={'flex-1'}>05</div>
-        </div>
+          <GameRow className={'flex-1 flex flex-row min-w-full'}>
+
+          </GameRow>
+          <GameRow className={'flex-1 flex flex-row min-w-full'}>
+
+          </GameRow>
+          <GameRow className={'flex-1 flex flex-row min-w-full'}>
+
+          </GameRow>
+          <GameRow className={'flex-1 flex flex-row min-w-full'}>
+
+          </GameRow>
+          <GameRow className={'flex-1 flex flex-row min-w-full'}>
+
+          </GameRow>
+        </Card>
       </div>
     </main>
   );
