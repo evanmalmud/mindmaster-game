@@ -77,3 +77,4 @@ https://shubhamverma.me/blog/authentication-and-protected-routes-with-remix-auth
 https://devtools.tech/blog/add-social-authentication-to-remix-run-project-or-express-server---rid---jVwo6agJvN2oX4IegYgz
 https://github.com/TheRealFlyingCoder/remix-auth-socials
 https://github.com/pbteja1998/remix-auth-google
+https://github.com/catppuccin/tailwindcss
