@@ -131,7 +131,7 @@ function GameSubmitButton({
           'rounded-full border border-solid border-black bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700',
           className,
         )}
-        onSubmit={onSubmit}
+        onClick={onSubmit}
       >
         Submit
       </button>
