@@ -8,7 +8,7 @@ import { Card, CardContent } from '~/components/ui/card';
 import { authenticator } from '~/services/auth.server';
 import { getUniqueCode } from '~/lib/code';
 import { GameRow } from '~/components/ui/gamerow';
-import React from 'react';
+import React, { useState } from 'react';
 
 export function loader() {
   const code = getUniqueCode();
@@ -21,26 +21,22 @@ const numberOfGuessesAllowed = 5;
 export default function GameScreen() {
   const { code } = useLoaderData<typeof loader>();
 
-  const [activeRow, setActiveRowState] = React.useState(0);
+  const [activeRow, setActiveRowState] = useState(0);
 
   const onSubmit = () => {
+    //CheckState of active Row and determine if winning
+    console.log('CheckState active: ' + activeRow);
     if (activeRow + 1 >= numberOfGuessesAllowed) {
       //TODO: END/LOSS STATE
     } else {
       setActiveRowState(activeRow + 1);
     }
   };
+  console.log('The active row is' + activeRow);
 
   const gameRows = [];
   for (let i = 0; i < numberOfGuessesAllowed; i++) {
-    gameRows.push(
-      <GameRow
-        key={i}
-        isActive={i == activeRow}
-        onSubmit={onSubmit}
-        className={'flex min-w-full flex-row'}
-      />,
-    );
+    gameRows.push({ index: i, isActive: i === activeRow });
   }
 
   return (
@@ -60,7 +56,15 @@ export default function GameScreen() {
         <Card
           className={`box-border flex min-h-96 min-w-full flex-col gap-2 rounded border-solid border-black bg-white p-2`}
         >
-          {gameRows}
+          {gameRows.map((row) => (
+            <GameRow
+              activeRow={activeRow}
+              key={row.index}
+              index={row.index}
+              isActive={row.isActive}
+              onSubmit={onSubmit}
+            />
+          ))}
         </Card>
       </div>
     </main>
