@@ -1,8 +1,10 @@
-type Code = string[];
+import * as defaults from './constants';
 
-const COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+type Code = number[];
 
-export function getUniqueCode(previousCodes?: string[][]) {
+const COLORS = defaults.masterMindColors;
+
+export function getUniqueCode(previousCodes?: number[][]) {
   const code = createCode();
 
   if (previousCodes?.some((c) => isEqualArrays(c, code))) {
@@ -12,7 +14,7 @@ export function getUniqueCode(previousCodes?: string[][]) {
   return code;
 }
 
-function createCode(): string[] {
+function createCode(): number[] {
   const code = new Array(4);
 
   for (let i = 0; i < code.length; i++) {
@@ -23,7 +25,7 @@ function createCode(): string[] {
 }
 
 function getRandomColor() {
-  return COLORS[Math.floor(Math.random() * COLORS.length)];
+  return Math.floor(Math.random() * COLORS.length);
 }
 
 function isEqualArrays<T>(arr1: T[], arr2: T[]): boolean {

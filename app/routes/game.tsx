@@ -1,37 +1,83 @@
 import { motion } from 'framer-motion';
-import type { LoaderFunctionArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
+import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
+import { useActionData, useLoaderData } from '@remix-run/react';
 
-import { Button } from '~/components/ui/button';
-import { Card, CardContent } from '~/components/ui/card';
-import { authenticator } from '~/services/auth.server';
+import { Card } from '~/components/ui/card';
 import { getUniqueCode } from '~/lib/code';
 import { GameRow } from '~/components/ui/gamerow';
-import React, { useState } from 'react';
+import { useState } from 'react';
+
+interface GameSubmit {
+  gameButtonSubmission: number[];
+  activeRowSubmission: number;
+}
+
+interface GameState {
+  activeRow: number;
+  results: number[][];
+  submissions: number[][];
+}
+
+const code = getUniqueCode();
+const numberOfGuessesAllowed = 5;
 
 export function loader() {
-  const code = getUniqueCode();
+  //const code = getUniqueCode();
+  console.log('code: ');
+  console.log(code);
 
   return json({ code });
 }
 
-const numberOfGuessesAllowed = 5;
+export async function action({ request }: ActionFunctionArgs) {
+  //Grab all the form data
+  const formData = await request.formData();
+  const gameButtons = formData.getAll('GameButton');
+  const activeRow = formData.get('ActiveRow');
+
+  let gameButtonSubmission: number[] = [];
+  gameButtons.forEach((key) => gameButtonSubmission.push(Number(key)));
+
+  let activeRowSubmission = Number(activeRow);
+
+  let submission: GameSubmit = {
+    gameButtonSubmission,
+    activeRowSubmission,
+  };
+
+  return submission;
+}
 
 export default function GameScreen() {
   const { code } = useLoaderData<typeof loader>();
 
   const [activeRow, setActiveRowState] = useState(0);
 
-  const onSubmit = () => {
-    //CheckState of active Row and determine if winning
-    console.log('CheckState active: ' + activeRow);
-    if (activeRow + 1 >= numberOfGuessesAllowed) {
-      //TODO: END/LOSS STATE
-    } else {
-      setActiveRowState(activeRow + 1);
+  let submissionData = useActionData<typeof action>();
+
+  if (submissionData?.activeRowSubmission == undefined) {
+    //Submit never hit
+  } else {
+    if (submissionData?.activeRowSubmission == activeRow) {
+      // We just submitted a new row!
+      console.log(code);
+      console.log(submissionData?.gameButtonSubmission);
+      if (
+        JSON.stringify(submissionData?.gameButtonSubmission) ==
+        JSON.stringify(code)
+      ) {
+        // WIN
+        console.log('WINNER WINNER');
+      } else if (activeRow >= numberOfGuessesAllowed) {
+        // LOSE
+        console.log('LOSER LOSER');
+      } else {
+        // NEXT GUESS
+        setActiveRowState(activeRow + 1);
+      }
     }
-  };
+  }
+
   console.log('The active row is' + activeRow);
 
   const gameRows = [];
@@ -62,7 +108,6 @@ export default function GameScreen() {
               key={row.index}
               index={row.index}
               isActive={row.isActive}
-              onSubmit={onSubmit}
             />
           ))}
         </Card>
