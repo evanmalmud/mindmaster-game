@@ -9,6 +9,7 @@ import { aC } from 'vitest/dist/reporters-rzC174PQ';
 import { Form, useActionData, useLoaderData } from '@remix-run/react';
 import * as defaults from '../../lib/constants';
 import { action, loader } from '~/routes/game';
+import { GameState } from '~/lib/gameStateManager';
 
 // Create game state for buttons inputs
 // The index of the color for each button
@@ -42,7 +43,7 @@ function GameRow({
           isActive={row.isActive}
         />
       ))}
-      <GameResults index={index} activeRow={activeRow} isActive={isActive} />
+      <GameResults index={index} />
     </Form>
   );
 }
@@ -93,63 +94,32 @@ function GameButton({
   );
 }
 
-function GameResults({
-  index,
-  activeRow,
-  isActive,
-  onSubmit,
-}: {
-  index: number;
-  activeRow: number;
-  isActive: boolean;
-  onSubmit?(): void;
-}) {
-  const { code } = useLoaderData<typeof loader>();
-
-  let submissionData = useActionData<typeof action>();
-  let correctColorAndSpot: number = 0;
-  let correctColor: number = 0;
-  if (
-    submissionData?.activeRowSubmission != undefined &&
-    submissionData.activeRowSubmission == index
-  ) {
-    if (submissionData?.gameButtonSubmission != undefined) {
-      //Calc results
-      let temp: number[] = Object.assign([], code);
-      for (let i = 0; i < submissionData?.gameButtonSubmission.length; i++) {
-        if (temp.indexOf(submissionData?.gameButtonSubmission[i]) > -1) {
-          temp.splice(temp.indexOf(submissionData?.gameButtonSubmission[i]), 1);
-          correctColor++;
-        }
-      }
-
-      for (let i = 0; i < submissionData?.gameButtonSubmission.length; i++) {
-        if (code[i] == submissionData?.gameButtonSubmission[i]) {
-          correctColorAndSpot++;
-        }
-      }
-      correctColor = correctColor - correctColorAndSpot;
-    }
-  }
+function GameResults({ index }: { index: number }) {
+  const gameState: GameState = useLoaderData<typeof loader>();
 
   // Create Results
   const gameResults = [];
-  for (let i = 0; i < correctColorAndSpot; i++) {
-    gameResults.push({ correctColorAndSpot: true });
+  for (let i = 0; i < 4; i++) {
+    if (i < gameState.results[index]?.correctColorAndSpot) {
+      gameResults.push({ key: i, correctColorAndSpot: true });
+    } else if (
+      i <
+      gameState.results[index]?.correctColorAndSpot +
+        gameState.results[index]?.correctColor
+    ) {
+      gameResults.push({ key: i, correctColor: true });
+    } else {
+      gameResults.push({ key: i });
+    }
   }
-  for (let i = 0; i < correctColor; i++) {
-    gameResults.push({ correctColor: true });
-  }
-  for (let i = gameResults.length; i < 4; i++) {
-    gameResults.push({});
-  }
-
+  console.log('Game results index: ' + index);
   console.log(gameResults);
+  console.log(gameState);
 
-  if (isActive) {
+  if (gameState.activeRow == index) {
     return (
       <div className={cn('ml-auto grid content-center justify-center gap-1')}>
-        <GameSubmitButton onSubmit={onSubmit} />
+        <GameSubmitButton />
       </div>
     );
   }
@@ -161,6 +131,7 @@ function GameResults({
     >
       {gameResults.map((row) => (
         <GameResultButton
+          key={row.key}
           correctColor={row.correctColor}
           correctColorAndSpot={row.correctColorAndSpot}
         />

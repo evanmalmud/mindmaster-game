@@ -4,6 +4,7 @@ import { useActionData, useLoaderData } from '@remix-run/react';
 
 import { Card } from '~/components/ui/card';
 import { getUniqueCode } from '~/lib/code';
+import { GameState, calculateResults } from '~/lib/gameStateManager';
 import { GameRow } from '~/components/ui/gamerow';
 import { useState } from 'react';
 
@@ -12,21 +13,17 @@ interface GameSubmit {
   activeRowSubmission: number;
 }
 
-interface GameState {
-  activeRow: number;
-  results: number[][];
-  submissions: number[][];
-}
-
-const code = getUniqueCode();
 const numberOfGuessesAllowed = 5;
 
-export function loader() {
-  //const code = getUniqueCode();
-  console.log('code: ');
-  console.log(code);
+const gameState: GameState = {
+  code: getUniqueCode(),
+  activeRow: 0,
+  results: [],
+  submissions: [],
+};
 
-  return json({ code });
+export function loader() {
+  return gameState;
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -49,40 +46,49 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function GameScreen() {
-  const { code } = useLoaderData<typeof loader>();
+  const gameState = useLoaderData<typeof loader>();
 
-  const [activeRow, setActiveRowState] = useState(0);
+  const [state, setGameState] = useState(gameState);
 
   let submissionData = useActionData<typeof action>();
 
   if (submissionData?.activeRowSubmission == undefined) {
     //Submit never hit
   } else {
-    if (submissionData?.activeRowSubmission == activeRow) {
+    if (submissionData?.activeRowSubmission == state.activeRow) {
       // We just submitted a new row!
-      console.log(code);
-      console.log(submissionData?.gameButtonSubmission);
+      let updatedState = { ...state };
+      updatedState.submissions[submissionData?.activeRowSubmission] =
+        submissionData?.gameButtonSubmission;
+      updatedState.results[submissionData?.activeRowSubmission] =
+        calculateResults(gameState.code, submissionData?.gameButtonSubmission);
+      console.log(
+        updatedState.submissions[submissionData?.activeRowSubmission],
+      );
+      console.log(updatedState.results[submissionData?.activeRowSubmission]);
       if (
         JSON.stringify(submissionData?.gameButtonSubmission) ==
-        JSON.stringify(code)
+        JSON.stringify(gameState.code)
       ) {
         // WIN
         console.log('WINNER WINNER');
-      } else if (activeRow >= numberOfGuessesAllowed) {
+      } else if (state.activeRow >= numberOfGuessesAllowed) {
         // LOSE
         console.log('LOSER LOSER');
-      } else {
-        // NEXT GUESS
-        setActiveRowState(activeRow + 1);
       }
+      // NEXT GUESS
+      let newActiveRow = { activeRow: state.activeRow + 1 };
+      console.log('ACTIVE ROW ' + newActiveRow);
+      setGameState((state: GameState) => ({
+        ...state,
+        ...newActiveRow,
+      }));
     }
   }
 
-  console.log('The active row is' + activeRow);
-
   const gameRows = [];
   for (let i = 0; i < numberOfGuessesAllowed; i++) {
-    gameRows.push({ index: i, isActive: i === activeRow });
+    gameRows.push({ index: i, isActive: i === state.activeRow });
   }
 
   return (
@@ -97,14 +103,14 @@ export default function GameScreen() {
           Mastermind
         </motion.h1>
 
-        <div>{code.toString()}</div>
+        <div>{gameState.code.toString()}</div>
 
         <Card
           className={`box-border flex min-h-96 min-w-full flex-col gap-2 rounded border-solid border-black bg-white p-2`}
         >
           {gameRows.map((row) => (
             <GameRow
-              activeRow={activeRow}
+              activeRow={state.activeRow}
               key={row.index}
               index={row.index}
               isActive={row.isActive}
