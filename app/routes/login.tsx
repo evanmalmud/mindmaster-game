@@ -1,10 +1,10 @@
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { Form, Link } from '@remix-run/react';
+import { ArrowLeftCircleIcon } from 'lucide-react';
 
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { authenticator } from '~/services/auth.server';
-import { ArrowLeftCircleIcon } from 'lucide-react';
 
 // If the user lands on this page, we redirect back to / if they are already logged in.
 export async function loader({ request }: LoaderFunctionArgs) {
