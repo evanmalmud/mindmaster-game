@@ -3,6 +3,8 @@ export interface GameState {
   activeRow: number;
   results: submissionResult[];
   submissions: number[][];
+  gameOver: boolean;
+  isWinner: boolean;
 }
 
 export interface submissionResult {

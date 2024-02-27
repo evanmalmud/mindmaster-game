@@ -8,34 +8,32 @@ import { array } from 'zod';
 import { aC } from 'vitest/dist/reporters-rzC174PQ';
 import { Form, useActionData, useLoaderData } from '@remix-run/react';
 import * as defaults from '../../lib/constants';
-import { action, loader } from '~/routes/game';
 import { GameState } from '~/lib/gameStateManager';
+import { action, loader } from '~/routes/game';
 
 // Create game state for buttons inputs
 // The index of the color for each button
 
-function GameRow({
-  activeRow,
-  isActive,
-  index,
-}: {
-  activeRow: number;
-  isActive: boolean;
-  index: number;
-}) {
+function GameRow({ isActive, index }: { isActive: boolean; index: number }) {
+  let gameState = useLoaderData<typeof loader>();
+
   if (isActive) {
     console.log('ROW ACTIVE' + index + ' IS ACTIVE');
   }
-  var isShowColors = index <= activeRow;
+  var isShowColors = index <= gameState.activeRow;
 
   const numberOfButtons = 4;
   const gameButtons = [];
   for (let i = 0; i < numberOfButtons; i++) {
-    gameButtons.push({ index: i, isActive: index === activeRow });
+    gameButtons.push({ index: i, isActive: index === gameState.activeRow });
   }
   return (
     <Form method="post" className={cn('flex min-w-full flex-row gap-2')}>
-      <input type="hidden" name={'ActiveRow'} value={activeRow}></input>
+      <input
+        type="hidden"
+        name={'ActiveRow'}
+        value={gameState.activeRow}
+      ></input>
       {gameButtons.map((row) => (
         <GameButton
           index={row.index}
@@ -95,8 +93,7 @@ function GameButton({
 }
 
 function GameResults({ index }: { index: number }) {
-  const gameState: GameState = useLoaderData<typeof loader>();
-
+  let gameState = useLoaderData<typeof loader>();
   // Create Results
   const gameResults = [];
   for (let i = 0; i < 4; i++) {
@@ -150,9 +147,9 @@ function GameResultButton({
   var className = '';
   if (correctColorAndSpot) {
     console.log('Correct');
-    className = 'bg-green';
+    className = 'bg-ctp-green';
   } else if (correctColor) {
-    className = 'bg-red';
+    className = 'bg-ctp-red';
   }
   return (
     <div>
