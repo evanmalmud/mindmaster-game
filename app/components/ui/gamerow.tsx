@@ -1,26 +1,25 @@
-import * as React from 'react';
-import * as LabelPrimitive from '@radix-ui/react-label';
-import { cva, type VariantProps } from 'class-variance-authority';
-
-import { cn } from '~/utils';
-import { Button } from './button';
-import { array } from 'zod';
-import { aC } from 'vitest/dist/reporters-rzC174PQ';
 import { Form, useActionData, useLoaderData } from '@remix-run/react';
-import * as defaults from '../../lib/constants';
-import { GameState } from '~/lib/gameStateManager';
+import * as React from 'react';
+
 import { action, loader } from '~/routes/game';
+import { cn } from '~/utils';
+
+import * as defaults from '../../lib/constants';
 
 // Create game state for buttons inputs
 // The index of the color for each button
 
 function GameRow({ isActive, index }: { isActive: boolean; index: number }) {
-  let gameState = useLoaderData<typeof loader>();
+  const gameLoaderState = useLoaderData<typeof loader>();
+  let gameState = useActionData<typeof action>();
+  if (gameState == undefined) {
+    gameState = gameLoaderState;
+  }
 
   if (isActive) {
     console.log('ROW ACTIVE' + index + ' IS ACTIVE');
   }
-  var isShowColors = index <= gameState.activeRow;
+  const isShowColors = index <= gameState.activeRow;
 
   const numberOfButtons = 4;
   const gameButtons = [];
@@ -31,11 +30,17 @@ function GameRow({ isActive, index }: { isActive: boolean; index: number }) {
     <Form method="post" className={cn('flex min-w-full flex-row gap-2')}>
       <input
         type="hidden"
+        name={'GameState'}
+        value={JSON.stringify(gameState)}
+      ></input>
+      <input
+        type="hidden"
         name={'ActiveRow'}
         value={gameState.activeRow}
       ></input>
       {gameButtons.map((row) => (
         <GameButton
+          key={row.index}
           index={row.index}
           isShowColors={isShowColors}
           isActive={row.isActive}
@@ -47,17 +52,16 @@ function GameRow({ isActive, index }: { isActive: boolean; index: number }) {
 }
 
 function GameButton({
-  index,
   isActive,
   isShowColors,
 }: {
-  index: number;
+  index?: number;
   isActive: boolean;
   isShowColors: boolean;
 }) {
   const [buttonState, setButtonState] = React.useState(0);
 
-  const onClick = () => {
+  function onClick() {
     if (!isActive) {
       return;
     }
@@ -66,10 +70,10 @@ function GameButton({
     } else {
       setButtonState(buttonState + 1);
     }
-  };
+  }
 
   const disabledButtonClass = 'cursor-not-allowed';
-  var className = '';
+  let className = '';
 
   if (!isActive) {
     className = cn(className, disabledButtonClass);
@@ -93,7 +97,11 @@ function GameButton({
 }
 
 function GameResults({ index }: { index: number }) {
-  let gameState = useLoaderData<typeof loader>();
+  const gameLoaderState = useLoaderData<typeof loader>();
+  let gameState = useActionData<typeof action>();
+  if (gameState == undefined) {
+    gameState = gameLoaderState;
+  }
   // Create Results
   const gameResults = [];
   for (let i = 0; i < 4; i++) {
@@ -144,7 +152,7 @@ function GameResultButton({
   correctColor?: boolean;
   correctColorAndSpot?: boolean;
 }) {
-  var className = '';
+  let className = '';
   if (correctColorAndSpot) {
     console.log('Correct');
     className = 'bg-ctp-green';
@@ -164,16 +172,13 @@ function GameResultButton({
   );
 }
 
-function GameSubmitButton({
-  className,
-}: React.HTMLAttributes<HTMLButtonElement>) {
+function GameSubmitButton() {
   return (
     <div>
       <button
         type="submit"
         className={cn(
           'rounded-full border border-solid border-black bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700',
-          className,
         )}
       >
         Submit

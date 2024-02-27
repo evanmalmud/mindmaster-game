@@ -1,30 +1,28 @@
-import { motion } from 'framer-motion';
-import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
+import { ActionFunctionArgs } from '@remix-run/node';
 import { useActionData, useLoaderData } from '@remix-run/react';
+import { motion } from 'framer-motion';
 
 import { Card } from '~/components/ui/card';
+import { GameRow } from '~/components/ui/gamerow';
 import { getUniqueCode } from '~/lib/code';
 import { GameState, calculateResults } from '~/lib/gameStateManager';
-import { GameRow } from '~/components/ui/gamerow';
-import { useState } from 'react';
 
-interface GameSubmit {
+type GameSubmit = {
   gameButtonSubmission: number[];
   activeRowSubmission: number;
-}
+};
 
 const numberOfGuessesAllowed = 5;
 
-export let globalGameState: GameState = {
-  code: getUniqueCode(),
-  activeRow: 0,
-  results: [],
-  submissions: [],
-  gameOver: false,
-  isWinner: false,
-};
-
 export function loader() {
+  const globalGameState: GameState = {
+    code: getUniqueCode(),
+    activeRow: 0,
+    results: [],
+    submissions: [],
+    gameOver: false,
+    isWinner: false,
+  };
   return globalGameState;
 }
 
@@ -33,45 +31,52 @@ export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const gameButtons = formData.getAll('GameButton');
   const activeRow = formData.get('ActiveRow');
+  const gameStateExport = formData.get('GameState');
+  console.log('gameStateExport');
+  console.log(gameStateExport);
+  const gameState: GameState = JSON.parse(gameStateExport?.toString() ?? '');
 
-  let gameButtonSubmission: number[] = [];
+  const gameButtonSubmission: number[] = [];
   gameButtons.forEach((key) => gameButtonSubmission.push(Number(key)));
 
-  let activeRowSubmission = Number(activeRow);
+  const activeRowSubmission = Number(activeRow);
 
-  let submissionData: GameSubmit = {
+  const submissionData: GameSubmit = {
     gameButtonSubmission,
     activeRowSubmission,
   };
-  globalGameState.submissions[submissionData?.activeRowSubmission] =
+  gameState.submissions[submissionData?.activeRowSubmission] =
     submissionData.gameButtonSubmission;
-  globalGameState.results[submissionData?.activeRowSubmission] =
-    calculateResults(
-      globalGameState.code,
-      submissionData?.gameButtonSubmission,
-    );
+  gameState.results[submissionData?.activeRowSubmission] = calculateResults(
+    gameState.code,
+    submissionData?.gameButtonSubmission,
+  );
 
   if (
     JSON.stringify(submissionData?.gameButtonSubmission) ==
-    JSON.stringify(globalGameState.code)
+    JSON.stringify(gameState.code)
   ) {
     // WIN
-    globalGameState.isWinner = true;
-    globalGameState.gameOver = true;
+    gameState.isWinner = true;
+    gameState.gameOver = true;
     console.log('WINNER WINNER');
-  } else if (globalGameState.activeRow >= numberOfGuessesAllowed) {
+  } else if (gameState.activeRow >= numberOfGuessesAllowed) {
     // LOSE
-    globalGameState.gameOver = true;
+    gameState.gameOver = true;
     console.log('LOSER LOSER');
   }
   // NEXT GUESS
-  globalGameState.activeRow++;
+  gameState.activeRow++;
 
-  return globalGameState;
+  return gameState;
 }
 
 export default function GameScreen() {
+  const gameLoaderState = useLoaderData<typeof loader>();
   let gameState = useActionData<typeof action>();
+  if (gameState == undefined) {
+    gameState = gameLoaderState;
+  }
 
   const gameRows = [];
   for (let i = 0; i < numberOfGuessesAllowed; i++) {
@@ -89,8 +94,6 @@ export default function GameScreen() {
         >
           Mastermind
         </motion.h1>
-
-        <div>{gameState?.code.toString()}</div>
 
         <Card
           className={`box-border flex min-h-96 min-w-full flex-col gap-2 rounded border-solid border-black bg-white p-2`}

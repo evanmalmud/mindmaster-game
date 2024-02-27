@@ -1,7 +1,5 @@
 import * as defaults from './constants';
 
-type Code = number[];
-
 const COLORS = defaults.masterMindColors;
 
 export function getUniqueCode(previousCodes?: number[][]) {
