@@ -1,7 +1,7 @@
+import { Link } from '@remix-run/react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import type { ComponentProps, HTMLAttributes } from 'react';
-import { Link } from '@remix-run/react';
+import type { ComponentProps } from 'react';
 
 export function meta() {
   return [
@@ -84,7 +84,7 @@ export default function Index() {
                       onAnimationComplete={
                         isLastLetter ? () => setSubtitleIndex(1) : undefined
                       }
-                      className={`font-display flex h-6 w-6 items-center justify-center rounded-full uppercase ${subtitleColors[letterIdx % subtitleColors.length]}`}
+                      className={`flex h-6 w-6 items-center justify-center rounded-full font-display uppercase ${subtitleColors[letterIdx % subtitleColors.length]}`}
                     >
                       {letter}
                     </motion.div>
@@ -131,7 +131,7 @@ function Button({ children, ...props }: ComponentProps<typeof Link>) {
   return (
     <Link
       {...props}
-      className="font-matter hover:shadow-input-grow active:shadow-input-shrink shadow-input-idle group flex h-[60px] w-full items-center justify-center whitespace-nowrap rounded-3xl border-2 border-neutral-700 px-8 py-4 text-sm font-semibold uppercase leading-none transition-all duration-150 ease-in-out will-change-transform hover:translate-y-[-2px] active:translate-y-[2px] active:duration-100"
+      className="font-matter group flex h-[60px] w-full items-center justify-center whitespace-nowrap rounded-3xl border-2 border-neutral-700 px-8 py-4 text-sm font-semibold uppercase leading-none shadow-input-idle transition-all duration-150 ease-in-out will-change-transform hover:translate-y-[-2px] hover:shadow-input-grow active:translate-y-[2px] active:shadow-input-shrink active:duration-100"
     >
       {children}
     </Link>
