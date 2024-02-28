@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Form } from '@remix-run/react';
 import * as React from 'react';
 
@@ -5,6 +6,7 @@ import { useloadGameState } from '~/routes/game';
 import { cn } from '~/utils';
 
 import * as defaults from '../../lib/constants';
+
 import { GameResults } from './gameresults';
 
 // Create game state for buttons inputs
