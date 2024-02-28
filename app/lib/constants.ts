@@ -7,8 +7,7 @@ export const masterMindColors = [
 ];
 
 //TODO:
-// 1. Add answer on loss
-// 2. Add a guess -> 6
-// 3. Add Win State
+
+// 4. Copy last guess to next guess
 
 // Use DB for Game state

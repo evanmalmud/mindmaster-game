@@ -1,7 +1,7 @@
-import { Form, useActionData, useLoaderData } from '@remix-run/react';
+import { Form } from '@remix-run/react';
 import * as React from 'react';
 
-import { action, loader } from '~/routes/game';
+import { useloadGameState } from '~/routes/game';
 import { cn } from '~/utils';
 
 import * as defaults from '../../lib/constants';
@@ -9,16 +9,9 @@ import * as defaults from '../../lib/constants';
 // Create game state for buttons inputs
 // The index of the color for each button
 
-function GameRow({ isActive, index }: { isActive: boolean; index: number }) {
-  const gameLoaderState = useLoaderData<typeof loader>();
-  let gameState = useActionData<typeof action>();
-  if (gameState == undefined) {
-    gameState = gameLoaderState;
-  }
+function GameRow({ index }: { isActive: boolean; index: number }) {
+  const gameState = useloadGameState();
 
-  if (isActive) {
-    console.log('ROW ACTIVE' + index + ' IS ACTIVE');
-  }
   const isShowColors = index <= gameState.activeRow;
 
   const numberOfButtons = 4;
@@ -51,14 +44,17 @@ function GameRow({ isActive, index }: { isActive: boolean; index: number }) {
   );
 }
 
-function GameButton({
+export function GameButton({
+  index,
   isActive,
   isShowColors,
 }: {
-  index?: number;
+  index: number;
   isActive: boolean;
   isShowColors: boolean;
 }) {
+  const gameState = useloadGameState();
+
   const [buttonState, setButtonState] = React.useState(0);
 
   function onClick() {
@@ -75,12 +71,26 @@ function GameButton({
   const disabledButtonClass = 'cursor-not-allowed';
   let className = '';
 
-  if (!isActive) {
+  console.log(gameState);
+
+  if (!isActive || gameState.gameOver) {
     className = cn(className, disabledButtonClass);
   }
+
   if (isShowColors) {
     className = cn(className, defaults.masterMindColors[buttonState]);
   }
+
+  //Set initial button state
+  if (isActive && !gameState.gameOver && gameState.activeRow > 0) {
+    className = cn(
+      className,
+      defaults.masterMindColors[
+        gameState.submissions[gameState.activeRow - 1][index]
+      ],
+    );
+  }
+
   return (
     <>
       <input type="hidden" name={'GameButton'} value={buttonState}></input>
@@ -97,11 +107,7 @@ function GameButton({
 }
 
 function GameResults({ index }: { index: number }) {
-  const gameLoaderState = useLoaderData<typeof loader>();
-  let gameState = useActionData<typeof action>();
-  if (gameState == undefined) {
-    gameState = gameLoaderState;
-  }
+  const gameState = useloadGameState();
   // Create Results
   const gameResults = [];
   for (let i = 0; i < 4; i++) {
@@ -117,9 +123,6 @@ function GameResults({ index }: { index: number }) {
       gameResults.push({ key: i });
     }
   }
-  console.log('Game results index: ' + index);
-  console.log(gameResults);
-  console.log(gameState);
 
   if (gameState.activeRow == index) {
     return (
