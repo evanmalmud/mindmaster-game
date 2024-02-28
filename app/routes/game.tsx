@@ -39,8 +39,6 @@ export async function action({ request }: ActionFunctionArgs) {
   const gameButtons = formData.getAll('GameButton');
   const activeRow = formData.get('ActiveRow');
   const gameStateExport = formData.get('GameState');
-  console.log('gameStateExport');
-  console.log(gameStateExport);
   const gameState: GameState = JSON.parse(gameStateExport?.toString() ?? '');
 
   const gameButtonSubmission: number[] = [];
@@ -101,7 +99,7 @@ export default function GameScreen() {
           <motion.h1
             animate={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: -700 }}
-            transition={{ duration: 0.5 }}
+            transition={{ type: 'spring', stiffness: 35, duration: 0.3 }}
             className="font-display text-6xl uppercase"
           >
             Mastermind
@@ -160,17 +158,28 @@ export function WinLossFooter() {
     controls.start('visible');
   }
 
+  function refreshPage() {
+    window.parent.location = window.parent.location.href;
+  }
+
   return (
     <motion.div
       variants={wrapperVariants}
       animate={controls}
       initial="hidden"
-      transition={{ duration: 0.5 }}
+      transition={{ type: 'spring', stiffness: 35, duration: 0.3 }}
     >
       <div className={cn('flex flex-col justify-center gap-2')}>
-        <h1 className="text-center font-display text-6xl uppercase">
-          {footerString}
-        </h1>
+        <div className="flex flex-row justify-center gap-6">
+          <h1 className="text-center font-display text-6xl uppercase">
+            {footerString}
+          </h1>
+          <button type="button" onClick={refreshPage}>
+            <h1 className="text-center font-display text-5xl uppercase">
+              Retry?
+            </h1>
+          </button>
+        </div>
         <div className="flex flex-row gap-2">
           {gameButtons.map((row) => (
             <WinLossAnswer key={row.index} colorIndex={row.colorIndex} />

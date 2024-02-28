@@ -99,8 +99,6 @@ export function GameButton({
     rowIndex >= gameState.activeRow
   ) {
     const isInitialized = { isInitialized: true };
-    console.log(rowIndex);
-    console.log(gameState);
     const buttonIndex = {
       initialColorIndex: gameState.submissions[rowIndex - 1][index],
       buttonColorIndex: gameState.submissions[rowIndex - 1][index],

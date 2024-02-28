@@ -52,7 +52,6 @@ function GameResultButton({
 }) {
   let className = '';
   if (correctColorAndSpot) {
-    console.log('Correct');
     className = 'bg-ctp-green';
   } else if (correctColor) {
     className = 'bg-ctp-red';
