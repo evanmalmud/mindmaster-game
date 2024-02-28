@@ -19,7 +19,7 @@ export function GameResults({ index }: { index: number }) {
     }
   }
 
-  if (gameState.activeRow == index) {
+  if (gameState.activeRow == index && !gameState.gameOver) {
     return (
       <div className={cn('ml-auto grid content-center justify-center gap-1')}>
         <GameSubmitButton />

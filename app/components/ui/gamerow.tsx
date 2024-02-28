@@ -75,7 +75,7 @@ export function GameButton({
   });
 
   function onClick() {
-    if (!isActive) {
+    if (!isActive || gameState.gameOver) {
       return;
     }
     let newIndex = {};
