@@ -8,6 +8,4 @@ export const masterMindColors = [
 
 //TODO:
 
-// 4. Copy last guess to next guess
-
 // Use DB for Game state

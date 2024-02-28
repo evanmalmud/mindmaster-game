@@ -5,11 +5,12 @@ import { useloadGameState } from '~/routes/game';
 import { cn } from '~/utils';
 
 import * as defaults from '../../lib/constants';
+import { GameResults } from './gameresults';
 
 // Create game state for buttons inputs
 // The index of the color for each button
 
-function GameRow({ index }: { isActive: boolean; index: number }) {
+export function GameRow({ index }: { isActive: boolean; index: number }) {
   const gameState = useloadGameState();
 
   const isShowColors = index <= gameState.activeRow;
@@ -35,6 +36,7 @@ function GameRow({ index }: { isActive: boolean; index: number }) {
         <GameButton
           key={row.index}
           index={row.index}
+          rowIndex={index}
           isShowColors={isShowColors}
           isActive={row.isActive}
         />
@@ -44,56 +46,91 @@ function GameRow({ index }: { isActive: boolean; index: number }) {
   );
 }
 
+type ButtonState = {
+  initialColorIndex: number;
+  buttonColorIndex: number;
+  isClicked: boolean;
+};
+
 export function GameButton({
   index,
+  rowIndex,
   isActive,
   isShowColors,
 }: {
   index: number;
+  rowIndex: number;
   isActive: boolean;
   isShowColors: boolean;
 }) {
   const gameState = useloadGameState();
 
-  const [buttonState, setButtonState] = React.useState(0);
+  //TODO: How to type this as ButtonState
+  const [buttonState, setButtonState] = React.useState({
+    initialColorIndex: 0,
+    buttonColorIndex: 0,
+    isInitialized: false,
+  });
 
   function onClick() {
     if (!isActive) {
       return;
     }
-    if (buttonState + 1 >= defaults.masterMindColors.length) {
-      setButtonState(0);
+    let newIndex = {};
+    if (buttonState.buttonColorIndex + 1 >= defaults.masterMindColors.length) {
+      newIndex = { buttonColorIndex: 0 };
     } else {
-      setButtonState(buttonState + 1);
+      newIndex = { buttonColorIndex: buttonState.buttonColorIndex + 1 };
     }
+
+    setButtonState((buttonState) => ({
+      ...buttonState,
+      ...newIndex,
+    }));
+  }
+
+  //Set initial button state if not clicked
+  if (
+    isActive &&
+    !buttonState.isInitialized &&
+    rowIndex > 0 &&
+    rowIndex >= gameState.activeRow
+  ) {
+    const isInitialized = { isInitialized: true };
+    console.log(rowIndex);
+    console.log(gameState);
+    const buttonIndex = {
+      initialColorIndex: gameState.submissions[rowIndex - 1][index],
+      buttonColorIndex: gameState.submissions[rowIndex - 1][index],
+    };
+    setButtonState((buttonState) => ({
+      ...buttonState,
+      ...buttonIndex,
+      ...isInitialized,
+    }));
   }
 
   const disabledButtonClass = 'cursor-not-allowed';
   let className = '';
-
-  console.log(gameState);
 
   if (!isActive || gameState.gameOver) {
     className = cn(className, disabledButtonClass);
   }
 
   if (isShowColors) {
-    className = cn(className, defaults.masterMindColors[buttonState]);
-  }
-
-  //Set initial button state
-  if (isActive && !gameState.gameOver && gameState.activeRow > 0) {
     className = cn(
       className,
-      defaults.masterMindColors[
-        gameState.submissions[gameState.activeRow - 1][index]
-      ],
+      defaults.masterMindColors[buttonState.buttonColorIndex],
     );
   }
 
   return (
     <>
-      <input type="hidden" name={'GameButton'} value={buttonState}></input>
+      <input
+        type="hidden"
+        name={'GameButton'}
+        value={buttonState.buttonColorIndex}
+      ></input>
       <button
         onClick={onClick}
         type="button"
@@ -105,89 +142,3 @@ export function GameButton({
     </>
   );
 }
-
-function GameResults({ index }: { index: number }) {
-  const gameState = useloadGameState();
-  // Create Results
-  const gameResults = [];
-  for (let i = 0; i < 4; i++) {
-    if (i < gameState.results[index]?.correctColorAndSpot) {
-      gameResults.push({ key: i, correctColorAndSpot: true });
-    } else if (
-      i <
-      gameState.results[index]?.correctColorAndSpot +
-        gameState.results[index]?.correctColor
-    ) {
-      gameResults.push({ key: i, correctColor: true });
-    } else {
-      gameResults.push({ key: i });
-    }
-  }
-
-  if (gameState.activeRow == index) {
-    return (
-      <div className={cn('ml-auto grid content-center justify-center gap-1')}>
-        <GameSubmitButton />
-      </div>
-    );
-  }
-  return (
-    <div
-      className={cn(
-        'ml-auto grid grid-cols-2 content-center justify-center gap-1 px-2',
-      )}
-    >
-      {gameResults.map((row) => (
-        <GameResultButton
-          key={row.key}
-          correctColor={row.correctColor}
-          correctColorAndSpot={row.correctColorAndSpot}
-        />
-      ))}
-    </div>
-  );
-}
-
-function GameResultButton({
-  correctColor,
-  correctColorAndSpot,
-}: {
-  correctColor?: boolean;
-  correctColorAndSpot?: boolean;
-}) {
-  let className = '';
-  if (correctColorAndSpot) {
-    console.log('Correct');
-    className = 'bg-ctp-green';
-  } else if (correctColor) {
-    className = 'bg-ctp-red';
-  }
-  return (
-    <div>
-      <button
-        type="button"
-        className={cn(
-          'size-8 rounded-full border border-solid border-black',
-          className,
-        )}
-      ></button>
-    </div>
-  );
-}
-
-function GameSubmitButton() {
-  return (
-    <div>
-      <button
-        type="submit"
-        className={cn(
-          'rounded-full border border-solid border-black bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700',
-        )}
-      >
-        Submit
-      </button>
-    </div>
-  );
-}
-
-export { GameRow };
