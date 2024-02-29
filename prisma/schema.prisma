@@ -13,4 +13,26 @@ model User {
   email     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  games Game[]
+}
+
+model Code {
+  id   Int   @id @unique @default(autoincrement())
+  code Int[]
+
+  games Game[]
+}
+
+model Game {
+  id         Int     @id @unique @default(autoincrement())
+  maxGuesses Int
+  isWinner   Boolean
+
+  submissions Json
+
+  codeId Int
+  code   Code    @relation(fields: [codeId], references: [id])
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 }
