@@ -12,7 +12,7 @@ export function getUniqueCode(previousCodes?: number[][]) {
   return code;
 }
 
-function createCode(): number[] {
+export function createCode(): number[] {
   const code = new Array(4);
 
   for (let i = 0; i < code.length; i++) {
