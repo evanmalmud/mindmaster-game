@@ -1,4 +1,5 @@
 import { Form } from '@remix-run/react';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 import { masterMindColors } from '~/lib/constants';
@@ -53,12 +54,13 @@ function GameButton({
   return (
     <>
       <input type="hidden" name="answer" value={buttonState} />
-      <button
+      <motion.button
         disabled={!isActive}
         onClick={onClick}
         type="button"
+        whileTap={{ scale: 0.9 }}
         className={cn(
-          'size-24 rounded-full border border-solid border-black',
+          'size-14 rounded-full border border-solid border-black lg:size-24',
           masterMindColors[buttonState],
           // disabled button styles
           {
@@ -67,7 +69,7 @@ function GameButton({
         )}
       >
         <span className="sr-only">{masterMindColors[buttonState]}</span>
-      </button>
+      </motion.button>
     </>
   );
 }
@@ -96,10 +98,13 @@ function GameResultDot({
   return (
     <div>
       <div
-        className={cn('size-8 rounded-full border border-solid border-black', {
-          'bg-ctp-green': correctColorAndSpot,
-          'bg-ctp-red': correctColor,
-        })}
+        className={cn(
+          'size-6 rounded-full border border-solid border-black lg:size-8',
+          {
+            'bg-ctp-green': correctColorAndSpot,
+            'bg-ctp-red': correctColor,
+          },
+        )}
       >
         <span className="sr-only">
           {correctColorAndSpot
@@ -116,12 +121,13 @@ function GameResultDot({
 function GameSubmitButton() {
   return (
     <div className="ml-auto grid content-center justify-center gap-1">
-      <button
+      <motion.button
         type="submit"
+        whileTap={{ scale: 0.9 }}
         className="rounded-full border border-solid border-black bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
       >
         Submit
-      </button>
+      </motion.button>
     </div>
   );
 }

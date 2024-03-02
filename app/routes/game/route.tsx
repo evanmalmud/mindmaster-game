@@ -1,4 +1,4 @@
-import type { ShouldRevalidateFunctionArgs } from '@remix-run/react';
+import { Link, type ShouldRevalidateFunctionArgs } from '@remix-run/react';
 import { motion, useAnimationControls } from 'framer-motion';
 import { useEffect } from 'react';
 
@@ -50,20 +50,24 @@ export default function Game() {
 
   return (
     <>
-      <main className="flex min-h-dvh flex-col items-center justify-center">
-        <div className="flex w-full max-w-lg flex-col items-center">
-          <motion.h1
-            animate={{ opacity: 1, y: 0 }}
-            initial={{ opacity: 0, y: -700 }}
-            transition={{ type: 'spring', stiffness: 35, duration: 0.3 }}
-            className="font-display text-6xl uppercase"
-          >
-            Mastermind
-          </motion.h1>
+      <header className="border-b border-neutral-400">
+        <div className="container px-4 py-2">
+          <Link to="/">
+            <motion.h1
+              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: -700 }}
+              transition={{ type: 'spring', stiffness: 35, duration: 0.3 }}
+              className="font-display text-lg uppercase lg:text-2xl"
+            >
+              Mastermind
+            </motion.h1>
+          </Link>
+        </div>
+      </header>
 
-          <Card
-            className={`box-border flex min-h-96 min-w-full flex-col gap-2 rounded border-solid border-black bg-white p-2`}
-          >
+      <main className="flex min-h-dvh flex-col items-center justify-center">
+        <div className="container px-4">
+          <Card className="mx-auto flex min-h-96 max-w-[400px] flex-col gap-2 rounded border-solid border-neutral-600 p-2 lg:max-w-lg">
             {gameState.game.submissions.map((_, i) => (
               <GameRow key={i} index={i} />
             ))}
