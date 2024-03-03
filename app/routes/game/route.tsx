@@ -1,5 +1,5 @@
 import { Link, type ShouldRevalidateFunctionArgs } from '@remix-run/react';
-import { motion, useAnimationControls } from 'framer-motion';
+import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
 import { useEffect } from 'react';
 
 import { Card } from '~/components/ui/card';
@@ -67,10 +67,12 @@ export default function Game() {
 
       <main className="flex min-h-dvh flex-col items-center justify-center">
         <div className="container px-4">
-          <Card className="mx-auto flex min-h-96 max-w-[400px] flex-col gap-2 rounded border-solid border-neutral-600 p-2 lg:max-w-lg">
-            {gameState.game.submissions.map((_, i) => (
-              <GameRow key={i} index={i} />
-            ))}
+          <Card className="mx-auto flex h-[402px] max-w-[400px] flex-col gap-y-4 rounded border-solid border-neutral-600 p-2 lg:h-[562px] lg:max-w-lg">
+            <AnimatePresence>
+              {gameState.game.submissions.map((_, i) => (
+                <GameRow key={i} index={i} />
+              ))}
+            </AnimatePresence>
           </Card>
         </div>
 
