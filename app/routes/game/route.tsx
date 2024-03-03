@@ -1,12 +1,12 @@
-import { Link, type ShouldRevalidateFunctionArgs } from '@remix-run/react';
-import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
+import type { ShouldRevalidateFunctionArgs } from '@remix-run/react';
+import { Form, Link } from '@remix-run/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 
-import { Card } from '~/components/ui/card';
 import { Toaster } from '~/components/ui/toaster';
 import { useToast } from '~/components/ui/use-toast';
 import { masterMindColors } from '~/lib/constants';
-import { GameRow } from '~/routes/game/gamerow';
+import { GameRow, GameSubmitButton } from '~/routes/game/gamerow';
 import { cn } from '~/utils';
 
 import {
@@ -50,34 +50,44 @@ export default function Game() {
 
   return (
     <>
-      <header className="border-b border-neutral-400">
-        <div className="container px-4 py-2">
-          <Link to="/">
-            <motion.h1
-              animate={{ opacity: 1, y: 0 }}
-              initial={{ opacity: 0, y: -700 }}
-              transition={{ type: 'spring', stiffness: 35, duration: 0.3 }}
-              className="font-display text-lg uppercase lg:text-2xl"
-            >
-              Mastermind
-            </motion.h1>
-          </Link>
-        </div>
-      </header>
+      <div className="flex min-h-dvh flex-col">
+        <header className="sticky top-0 border-b border-neutral-400">
+          <div className="container px-4 py-2">
+            <Link to="/">
+              <motion.h1
+                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: -700 }}
+                transition={{ type: 'spring', stiffness: 35, duration: 0.3 }}
+                className="font-display text-lg uppercase lg:text-2xl"
+              >
+                Mastermind
+              </motion.h1>
+            </Link>
+          </div>
+        </header>
 
-      <main className="flex min-h-dvh flex-col items-center justify-center">
-        <div className="container px-4">
-          <Card className="mx-auto flex h-[402px] max-w-[400px] flex-col gap-y-4 rounded border-solid border-neutral-600 p-2 lg:h-[562px] lg:max-w-lg">
-            <AnimatePresence>
-              {gameState.game.submissions.map((_, i) => (
-                <GameRow key={i} index={i} />
-              ))}
-            </AnimatePresence>
-          </Card>
-        </div>
+        <main className="mt-10 flex flex-auto flex-col md:mt-0 md:items-center md:justify-center">
+          <Form method="post" className="flex flex-col items-center gap-y-8">
+            <div className="container px-4">
+              <motion.div
+                animate={{ scale: gameState.isGameOver ? 0.7 : 1 }}
+                className="mx-auto flex h-[362px] max-w-[400px] flex-col gap-y-4 rounded-xl border border-solid border-neutral-600 bg-card p-2 text-card-foreground shadow sm:h-[402px] lg:h-[562px] lg:max-w-lg"
+              >
+                <AnimatePresence>
+                  {gameState.game.submissions.map((_, i) => (
+                    <GameRow key={i} index={i} />
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            </div>
 
-        <WinLossFooter />
-      </main>
+            {!gameState.isGameOver ? <GameSubmitButton /> : null}
+          </Form>
+
+          {gameState.isGameOver ? <WinLossFooter /> : null}
+        </main>
+      </div>
+
       <Toaster />
     </>
   );
@@ -85,38 +95,8 @@ export default function Game() {
 
 export function WinLossFooter() {
   const gameState = useGameState();
-  const controls = useAnimationControls();
 
-  const wrapperVariants = {
-    hidden: {
-      opacity: 0,
-      y: 300,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-    },
-  };
-
-  const gameButtons = [];
-
-  for (let i = 0; i < 4; i++) {
-    gameButtons.push({
-      index: i,
-      colorIndex: 1,
-    });
-  }
-
-  let footerString = 'LOSS';
-  if (gameState.game.isWinner) {
-    footerString = 'WINNER';
-  }
-  if (gameState.isGameOver) {
-    for (let i = 0; i < 4; i++) {
-      gameButtons[i].colorIndex = gameState.game.code.code[i];
-    }
-    controls.start('visible');
-  }
+  const decision = gameState.game.isWinner ? 'winner' : 'loss';
 
   function refreshPage() {
     window.parent.location = window.parent.location.href;
@@ -124,15 +104,20 @@ export function WinLossFooter() {
 
   return (
     <motion.div
-      variants={wrapperVariants}
-      animate={controls}
-      initial="hidden"
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      initial={{
+        opacity: 0,
+        y: 300,
+      }}
       transition={{ type: 'spring', stiffness: 35, duration: 0.3 }}
     >
-      <div className={cn('flex flex-col justify-center gap-2')}>
+      <div className="flex flex-col items-center justify-center gap-2">
         <div className="flex flex-row justify-center gap-6">
           <h1 className="text-center font-display text-6xl uppercase">
-            {footerString}
+            {decision}
           </h1>
           <button type="button" onClick={refreshPage}>
             <h1 className="text-center font-display text-5xl uppercase">
@@ -141,8 +126,8 @@ export function WinLossFooter() {
           </button>
         </div>
         <div className="flex flex-row gap-2">
-          {gameButtons.map((row) => (
-            <WinLossAnswer key={row.index} colorIndex={row.colorIndex} />
+          {gameState.game.code.code.map((codeColor, i) => (
+            <WinLossAnswer key={i} colorIndex={codeColor} />
           ))}
         </div>
       </div>
@@ -153,13 +138,12 @@ export function WinLossFooter() {
 export function WinLossAnswer({ colorIndex }: { colorIndex: number }) {
   return (
     <>
-      <button
-        type="button"
+      <div
         className={cn(
-          'size-24 rounded-full border border-solid border-black',
+          'size-14 select-none rounded-full border border-solid border-black sm:size-16 lg:size-24',
           masterMindColors[colorIndex],
         )}
-      ></button>
+      />
     </>
   );
 }

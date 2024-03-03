@@ -1,4 +1,3 @@
-import { Form } from '@remix-run/react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
@@ -17,7 +16,7 @@ export function GameRow({ index }: { index: number }) {
   const isActiveRow = index === gameState.activeRow;
 
   return (
-    <Form method="post" className={cn('flex min-w-full flex-row gap-2')}>
+    <div className="flex min-w-full flex-row gap-2">
       <input type="hidden" name="id" value={gameState.game.id} />
       {submission.code.map((value, i) => (
         <GameButton
@@ -28,12 +27,19 @@ export function GameRow({ index }: { index: number }) {
         />
       ))}
 
-      {isActiveRow ? (
-        <GameSubmitButton />
-      ) : (
-        <GameResults result={submission.result} />
-      )}
-    </Form>
+      <GameResults result={submission.result} />
+    </div>
+  );
+}
+
+export function GameSubmitButton() {
+  return (
+    <BaseButton
+      type="submit"
+      className="bg-blue-500 px-8 py-2 font-bold text-white"
+    >
+      Submit
+    </BaseButton>
   );
 }
 
@@ -61,7 +67,10 @@ function GameButton({
 
   return (
     <>
-      <input type="hidden" name="answer" value={buttonState} />
+      {isActive ? (
+        <input type="hidden" name="answer" value={buttonState} />
+      ) : null}
+
       <BaseButton
         disabled={!isActive}
         onClick={onClick}
@@ -69,10 +78,14 @@ function GameButton({
         transition={{
           delay: MOTION_DELAY[index],
         }}
-        className={cn('size-16 lg:size-24', masterMindColors[buttonState], {
-          // disabled button styles
-          'cursor-not-allowed opacity-50': !isActive,
-        })}
+        className={cn(
+          'size-14 select-none sm:size-16 lg:size-24',
+          masterMindColors[buttonState],
+          {
+            // disabled button styles
+            'cursor-not-allowed opacity-50': !isActive,
+          },
+        )}
       >
         <span className="sr-only">{masterMindColors[buttonState]}</span>
       </BaseButton>
@@ -124,22 +137,6 @@ function GameResultDot({
   );
 }
 
-function GameSubmitButton() {
-  return (
-    <div className="ml-auto grid content-center justify-center gap-1">
-      <BaseButton
-        transition={{
-          delay: MOTION_DELAY[4],
-        }}
-        type="submit"
-        className="bg-blue-500 px-4 py-2 font-bold text-white"
-      >
-        Enter
-      </BaseButton>
-    </div>
-  );
-}
-
 function BaseButton({
   children,
   className,
@@ -159,10 +156,7 @@ function BaseButton({
         type: 'spring',
         bounce: 0.25,
       }}
-      onAnimationComplete={() => {
-        console.log('ANIM DONE');
-        setIsAnimating(false);
-      }}
+      onAnimationComplete={() => setIsAnimating(false)}
       className={cn(
         'font-matter group rounded-full border-2 border-neutral-700 shadow-input-idle will-change-transform',
         className,
