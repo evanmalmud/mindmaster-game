@@ -21,4 +21,8 @@ it('should return the correct results in a sorted array from correct (1) to inco
   // Double duplicates
   code = [1, 3, 1, 3];
   expect(calculateResult(code, submission)).toEqual([1, 1, 0, 0]);
+
+  code = [3, 3, 1, 0];
+  submission = [0, 1, 0, 1];
+  expect(calculateResult(code, submission)).toEqual([0, 0, -1, -1]);
 });
