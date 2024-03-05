@@ -93,46 +93,68 @@ function GameButton({
   );
 }
 
+const resultType = {
+  '-1': 'incorrect',
+  '0': 'correctColor',
+  '1': 'correctColorAndSpot',
+  '2': 'idle',
+} as const;
+
+type ResultType = (typeof resultType)[keyof typeof resultType];
+
+const resultText: Record<ResultType, string> = {
+  incorrect: 'Wrong wrong wrong',
+  correctColor: 'Correct color',
+  correctColorAndSpot: 'Correct color and spot',
+  idle: '',
+};
+
 function GameResults({ result }: { result: number[] }) {
   return (
     <div className="ml-auto grid grid-cols-2 content-center justify-center gap-1 px-2">
-      {result.map((value, i) => (
+      {(result.length ? result : [...Array(4)]).map((value, i) => (
         <GameResultDot
           key={i}
-          correctColor={value === 0}
-          correctColorAndSpot={value === 1}
+          index={i}
+          type={
+            typeof value !== 'undefined'
+              ? // @ts-expect-error toString produces any which is fine because we have a fallback
+                resultType[value.toString()]
+              : resultType[2]
+          }
         />
       ))}
     </div>
   );
 }
 
-function GameResultDot({
-  correctColor,
-  correctColorAndSpot,
-}: {
-  correctColor?: boolean;
-  correctColorAndSpot?: boolean;
-}) {
+function GameResultDot({ index, type }: { index: number; type: ResultType }) {
   return (
     <div>
-      <div
-        className={cn(
-          'size-6 rounded-full border border-solid border-black lg:size-8',
-          {
-            'bg-ctp-green': correctColorAndSpot,
-            'bg-ctp-red': correctColor,
-          },
-        )}
+      <motion.div
+        animate={{ scale: 1 }}
+        initial={{ scale: 0 }}
+        transition={{ delay: 0.6 + index * 0.1 }}
+        className="relative size-6 rounded-full border-2 border-neutral-700 bg-black will-change-transform lg:size-8"
       >
-        <span className="sr-only">
-          {correctColorAndSpot
-            ? 'Correct color and spot'
-            : correctColor
-              ? 'Correct color'
-              : 'Wrong wrong wrong'}
-        </span>
-      </div>
+        <motion.div
+          animate={{ y: type === 'idle' ? -1 : -3 }}
+          initial={{ y: -1 }}
+          transition={{
+            delay: index * 0.1,
+          }}
+          className={cn(
+            'absolute left-0 top-0 h-full w-full rounded-full border border-neutral-700 bg-black',
+            {
+              'bg-ctp-red': type === 'incorrect',
+              'bg-ctp-yellow': type === 'correctColor',
+              'bg-ctp-green': type === 'correctColorAndSpot',
+              'bg-neutral-50': type === 'idle',
+            },
+          )}
+        />
+        <span className="sr-only">{resultText[type]}</span>
+      </motion.div>
     </div>
   );
 }
