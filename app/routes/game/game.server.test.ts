@@ -1,28 +1,61 @@
 import { calculateResult } from './game.server';
 
-it('should return the correct results in a sorted array from correct (1) to incorrect (-1)', () => {
-  // Partial
-  let code = [1, 2, 3, 4];
-  let submission = [4, 2, 1, 0];
-  expect(calculateResult(code, submission)).toEqual([1, 0, 0, -1]);
+describe('calculateResult', () => {
+  let code: number[];
+  let submission: number[];
 
-  // All right
-  submission = [1, 2, 3, 4];
-  expect(calculateResult(code, submission)).toEqual([1, 1, 1, 1]);
+  it('should correctly evaluate partially correct submissions', () => {
+    code = [1, 2, 3, 4];
+    submission = [4, 2, 1, 0];
+    expect(calculateResult(code, submission)).toEqual([1, 0, 0, -1]);
 
-  // All wrong
-  submission = [5, 0, 5, 0];
-  expect(calculateResult(code, submission)).toEqual([-1, -1, -1, -1]);
+    submission = [1, 2, 3, 0];
+    expect(calculateResult(code, submission)).toEqual([1, 1, 1, -1]);
 
-  // Duplicates
-  submission = [1, 1, 3, 3];
-  expect(calculateResult(code, submission)).toEqual([1, 1, -1, -1]);
+    submission = [1, 2, 4, 0];
+    expect(calculateResult(code, submission)).toEqual([1, 1, 0, -1]);
 
-  // Double duplicates
-  code = [1, 3, 1, 3];
-  expect(calculateResult(code, submission)).toEqual([1, 1, 0, 0]);
+    submission = [1, 2, 5, 0];
+    expect(calculateResult(code, submission)).toEqual([1, 1, -1, -1]);
+  });
 
-  code = [3, 3, 1, 0];
-  submission = [0, 1, 0, 1];
-  expect(calculateResult(code, submission)).toEqual([0, 0, -1, -1]);
+  it('should correctly evaluate completely correct submissions', () => {
+    code = [1, 2, 3, 4];
+    submission = [1, 2, 3, 4];
+    expect(calculateResult(code, submission)).toEqual([1, 1, 1, 1]);
+  });
+
+  it('should correctly evaluate completely incorrect submissions', () => {
+    code = [1, 2, 3, 4];
+    submission = [5, 0, 5, 0];
+    expect(calculateResult(code, submission)).toEqual([-1, -1, -1, -1]);
+  });
+
+  it('should correctly evaluate submissions with duplicate values', () => {
+    code = [1, 2, 3, 4];
+    submission = [1, 1, 3, 3];
+    expect(calculateResult(code, submission)).toEqual([1, 1, -1, -1]);
+  });
+
+  it('should correctly evaluate submissions with double duplicate values', () => {
+    code = [1, 3, 1, 3];
+    submission = [1, 1, 3, 3];
+    expect(calculateResult(code, submission)).toEqual([1, 1, 0, 0]);
+  });
+
+  it('should correctly evaluate submissions with all misplaced values', () => {
+    code = [3, 3, 1, 1];
+    submission = [1, 1, 3, 3];
+    expect(calculateResult(code, submission)).toEqual([0, 0, 0, 0]);
+  });
+
+  it('should correctly evaluate submissions with only misplaced or incorrect values', () => {
+    code = [3, 3, 1, 1];
+    submission = [0, 0, 3, 3];
+    expect(calculateResult(code, submission)).toEqual([0, 0, -1, -1]);
+
+    code = [3, 3, 3, 1];
+    submission = [1, 0, 0, 0];
+    expect(calculateResult(code, submission)).toEqual([0, -1, -1, -1]);
+  });
 });
