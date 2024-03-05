@@ -105,6 +105,17 @@ export async function createGame(userId?: string) {
   return toParsedGame(game);
 }
 
+/**
+ * Calculates the results and returns an array of numbers that represent the 3
+ * possible states:
+ *
+ * 1: Correct color and spot
+ * 0: Correct color
+ * -1: Incorrect
+ *
+ * To keep it in a single loop, we just flip the code value to negative when a
+ * match is found.
+ */
 export function calculateResult(code: number[], submission: number[]) {
   const result: number[] = Array(code.length);
   const temp = [...code];
@@ -112,14 +123,14 @@ export function calculateResult(code: number[], submission: number[]) {
   for (let i = 0; i < submission.length; i++) {
     if (code[i] === submission[i]) {
       result[i] = RESULT_MAP.correctColorAndSpot;
-      temp.splice(i, 1);
+      temp[i] *= -1;
       continue;
     }
 
     const misplacedIndex = temp.indexOf(submission[i]);
     if (misplacedIndex > -1) {
       result[i] = RESULT_MAP.correctColor;
-      temp.splice(misplacedIndex, 1);
+      temp[misplacedIndex] *= -1;
       continue;
     }
 
