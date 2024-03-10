@@ -1,4 +1,4 @@
-import { calculateResult } from './game.server';
+import { calculateResult } from './game';
 
 describe('calculateResult', () => {
   let code: number[];
