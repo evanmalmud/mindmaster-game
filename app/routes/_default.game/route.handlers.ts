@@ -3,8 +3,14 @@ import { json } from '@remix-run/node';
 import { useActionData, useLoaderData } from '@remix-run/react';
 import { z } from 'zod';
 
-import { addGameSubmission, createGame } from '~/routes/game/game.server';
-import type { ParsedGame, Submission } from '~/routes/game/game.server';
+import {
+  addGameSubmission,
+  createGame,
+} from '~/routes/_default.game/game.server';
+import type {
+  ParsedGame,
+  Submission,
+} from '~/routes/_default.game/game.server';
 
 export async function loader() {
   const game = await createGame();

@@ -3,14 +3,19 @@ import type { User } from '@prisma/client';
 import { Authenticator } from 'remix-auth';
 import { Auth0Strategy } from 'remix-auth-auth0';
 import { GoogleStrategy } from 'remix-auth-google';
-import { z } from 'zod';
+import { TOTPStrategy } from 'remix-auth-totp';
 
+import {
+  ENCRYPTION_SECRET,
+  GOOGLE_CALLBACK_URL,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+} from '~/config/env.server';
+import { generateFromEmail } from '~/lib/random-username';
 import { sessionStorage } from '~/services/session.server';
 
-import { db as prisma } from './db.server';
-
-// Create an instance of the authenticator, pass a generic (optional) with what your
-// strategies will return and will be stored in the session
+import { db } from './db.server';
+import { sendAuthEmail } from './email.server';
 
 export const authenticator = new Authenticator<User>(sessionStorage);
 
@@ -23,8 +28,8 @@ const auth0Strategy = new Auth0Strategy(
   },
   async ({ profile }) => {
     const email = profile.emails?.[0].value ?? '';
-    // Get the user data from your DB or API using the tokens and profile
-    return prisma.user.upsert({
+
+    return db.user.upsert({
       where: {
         email,
       },
@@ -39,25 +44,16 @@ const auth0Strategy = new Auth0Strategy(
 
 authenticator.use(auth0Strategy);
 
-const googleAuthSecrets = z
-  .object({
-    GOOGLE_CLIENT_ID: z.string(),
-    GOOGLE_CLIENT_SECRET: z.string(),
-    GOOGLE_CALLBACK_URL: z.string(),
-  })
-  .parse(process.env);
-
 const googleStrategy = new GoogleStrategy(
   {
-    clientID: googleAuthSecrets.GOOGLE_CLIENT_ID,
-    clientSecret: googleAuthSecrets.GOOGLE_CLIENT_SECRET,
-    callbackURL: googleAuthSecrets.GOOGLE_CALLBACK_URL,
+    clientID: GOOGLE_CLIENT_ID,
+    clientSecret: GOOGLE_CLIENT_SECRET,
+    callbackURL: GOOGLE_CALLBACK_URL,
   },
   async ({ profile }) => {
-    // Get the user data from your DB or API using the tokens and profile
     const email = profile.emails[0].value;
 
-    return prisma.user.upsert({
+    return db.user.upsert({
       where: {
         email,
       },
@@ -74,3 +70,27 @@ const googleStrategy = new GoogleStrategy(
 );
 
 authenticator.use(googleStrategy);
+
+authenticator.use(
+  new TOTPStrategy(
+    {
+      secret: ENCRYPTION_SECRET,
+      sendTOTP: async ({ email, code, magicLink }) => {
+        await sendAuthEmail({ email, code, magicLink });
+      },
+    },
+    async ({ email }) => {
+      let user = await db.user.findFirst({
+        where: { email },
+      });
+
+      if (!user) {
+        user = await db.user.create({
+          data: { email, name: generateFromEmail(email) },
+        });
+      }
+
+      return user;
+    },
+  ),
+);
