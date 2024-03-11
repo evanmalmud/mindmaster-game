@@ -37,7 +37,7 @@ export default function Login() {
   const { authEmail, authError } = useLoaderData<typeof loader>();
 
   return (
-    <main className="flex flex-auto items-center justify-center px-8">
+    <main className="flex flex-col items-center px-8">
       <Card className="mt-12 w-full max-w-sm md:mt-24 md:max-w-md">
         <CardContent className="flex flex-col gap-4 pt-6">
           <Form
@@ -75,7 +75,9 @@ export default function Login() {
 
       {/* Errors Handling. */}
       {!authEmail && authError && (
-        <span className="font-semibold text-red-400">{authError.message}</span>
+        <span className="mt-8 font-semibold text-red-400">
+          {authError.message}
+        </span>
       )}
     </main>
   );
