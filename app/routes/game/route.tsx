@@ -1,5 +1,5 @@
 import type { ShouldRevalidateFunctionArgs } from '@remix-run/react';
-import { Form, Link } from '@remix-run/react';
+import { Form, Link, useLocation } from '@remix-run/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 
@@ -9,6 +9,7 @@ import { masterMindColors } from '~/lib/constants';
 import { GameRow, GameSubmitButton } from '~/routes/game/gamerow';
 import { cn } from '~/utils';
 
+import { HowToPlay } from './howToPlay';
 import {
   action,
   loader,
@@ -37,6 +38,10 @@ export default function Game() {
   const gameState = useGameState();
   const { toast } = useToast();
   const actionData = useGameRouteAction();
+
+  const { state } = useLocation();
+
+  console.log(state);
 
   // Toast for actions that return an error (mostly for dev purposes)
   useEffect(() => {
@@ -67,6 +72,7 @@ export default function Game() {
         </header>
 
         <main className="mt-10 flex flex-auto flex-col md:mt-0 md:items-center md:justify-center">
+          {state?.howToPlay ? <HowToPlay /> : null}
           <Form method="post" className="flex flex-col items-center gap-y-8">
             <div className="container px-4">
               <motion.div
