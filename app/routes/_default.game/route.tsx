@@ -9,7 +9,6 @@ import { masterMindColors } from '~/lib/constants';
 import { GameRow, GameSubmitButton } from '~/routes/_default.game/gamerow';
 import { cn } from '~/utils';
 
-import { HowToPlay } from './howToPlay';
 import {
   action,
   loader,
