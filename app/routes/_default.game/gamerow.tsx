@@ -18,7 +18,7 @@ export function GameRow({ index }: { index: number }) {
   return (
     <div className="flex min-w-full flex-row gap-2">
       <input type="hidden" name="id" value={gameState.game.id} />
-      {submission.code.map((value, i) => (
+      {submission.code.map((value: number, i: number) => (
         <GameButton
           key={i}
           index={i}
@@ -109,7 +109,7 @@ const resultText: Record<ResultType, string> = {
   idle: '',
 };
 
-function GameResults({ result }: { result: number[] }) {
+export function GameResults({ result }: { result: number[] }) {
   return (
     <div className="ml-auto grid grid-cols-2 content-center justify-center gap-1 px-2">
       {(result.length ? result : [...Array(4)]).map((value, i) => (
@@ -128,7 +128,13 @@ function GameResults({ result }: { result: number[] }) {
   );
 }
 
-function GameResultDot({ index, type }: { index: number; type: ResultType }) {
+export function GameResultDot({
+  index,
+  type,
+}: {
+  index: number;
+  type: ResultType;
+}) {
   return (
     <div>
       <motion.div
@@ -146,9 +152,9 @@ function GameResultDot({ index, type }: { index: number; type: ResultType }) {
           className={cn(
             'absolute left-0 top-0 h-full w-full rounded-full border border-neutral-700 bg-black',
             {
-              'bg-ctp-red': type === 'incorrect',
-              'bg-ctp-yellow': type === 'correctColor',
-              'bg-ctp-green': type === 'correctColorAndSpot',
+              'bg-code-gray': type === 'incorrect',
+              'bg-code-yellow': type === 'correctColor',
+              'bg-code-green': type === 'correctColorAndSpot',
               'bg-neutral-50': type === 'idle',
             },
           )}

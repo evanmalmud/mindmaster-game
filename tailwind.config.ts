@@ -17,6 +17,14 @@ export default {
     },
     extend: {
       colors: {
+        'code-green': '#6aaa64',
+        'code-yellow': '#c9b458',
+        'code-gray': '#777c7e',
+        'guess-red': '#ed8696',
+        'guess-blue': '#8aadf4',
+        'guess-peach': '#f5a97f',
+        'guess-yellow': '#eed49f',
+        'guess-green': '#a6da95',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -77,14 +85,5 @@ export default {
       },
     },
   },
-  plugins: [
-    require('tailwindcss-animate'),
-    require('@catppuccin/tailwindcss')({
-      // prefix to use, e.g. `text-pink` becomes `text-ctp-pink`.
-      // default is `false`, which means no prefix
-      prefix: 'ctp',
-      // which flavour of colours to use by default, in the `:root`
-      defaultFlavour: 'macchiato',
-    }),
-  ],
+  plugins: [require('tailwindcss-animate')],
 } satisfies Config;

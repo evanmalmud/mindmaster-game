@@ -1,4 +1,3 @@
-import type { Code, Game } from '@prisma/client';
 import type { JsonArray, JsonValue } from '@prisma/client/runtime/library';
 import { z } from 'zod';
 
@@ -83,7 +82,7 @@ export async function createGame(userId?: string) {
   const game = await db.game.create({
     data: {
       isWinner: false,
-      maxGuesses: 5,
+      maxGuesses: 6,
       submissions,
       code: {
         create: {

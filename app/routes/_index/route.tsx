@@ -53,7 +53,9 @@ export default function Index() {
                 stiffness: 100,
               }}
             >
-              <Button to={'/game'}>How To Play</Button>
+              <Button to={'/game'} state={{ howToPlay: true }}>
+                How To Play
+              </Button>
             </motion.div>
             <motion.div
               animate={{ opacity: 1, y: 0 }}
@@ -79,7 +81,9 @@ export default function Index() {
                 stiffness: 100,
               }}
             >
-              <Button to={'/game'}>Play</Button>
+              <Button to={'/game'} state={{ howToPlay: false }}>
+                Play
+              </Button>
             </motion.div>
           </div>
         </div>

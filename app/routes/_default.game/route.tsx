@@ -1,7 +1,7 @@
 import type { ShouldRevalidateFunctionArgs } from '@remix-run/react';
-import { Form, Link, useLocation } from '@remix-run/react';
+import { Form, useLocation } from '@remix-run/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect } from 'react';
+import { Key, useEffect } from 'react';
 
 import { Toaster } from '~/components/ui/toaster';
 import { useToast } from '~/components/ui/use-toast';
@@ -56,31 +56,15 @@ export default function Game() {
   return (
     <>
       <div className="flex min-h-dvh flex-col">
-        <header className="sticky top-0 border-b border-neutral-400">
-          <div className="container px-4 py-2">
-            <Link to="/">
-              <motion.h1
-                animate={{ opacity: 1, y: 0 }}
-                initial={{ opacity: 0, y: -700 }}
-                transition={{ type: 'spring', stiffness: 35, duration: 0.3 }}
-                className="font-display text-lg uppercase lg:text-2xl"
-              >
-                Mastermind
-              </motion.h1>
-            </Link>
-          </div>
-        </header>
-
-        <main className="mt-10 flex flex-auto flex-col md:mt-0 md:items-center md:justify-center">
-          {state?.howToPlay ? <HowToPlay /> : null}
+        <main className="flex flex-auto flex-col md:-mt-16 md:items-center md:justify-center">
           <Form method="post" className="flex flex-col items-center gap-y-8">
             <div className="container px-4">
               <motion.div
                 animate={{ scale: gameState.isGameOver ? 0.7 : 1 }}
-                className="mx-auto flex h-[362px] max-w-[400px] flex-col gap-y-4 rounded-xl border border-solid border-neutral-600 bg-card p-2 text-card-foreground shadow sm:h-[402px] lg:h-[562px] lg:max-w-lg"
+                className="mx-auto flex h-[362px] max-w-[400px] flex-col gap-y-4 rounded-xl border border-solid border-neutral-600 bg-card p-2 text-card-foreground shadow sm:h-[402px] lg:h-[675px] lg:max-w-lg"
               >
                 <AnimatePresence>
-                  {gameState.game.submissions.map((_, i) => (
+                  {gameState.game.submissions.map((_: unknown, i: number) => (
                     <GameRow key={i} index={i} />
                   ))}
                 </AnimatePresence>
@@ -132,9 +116,11 @@ export function WinLossFooter() {
           </button>
         </div>
         <div className="flex flex-row gap-2">
-          {gameState.game.code.code.map((codeColor, i) => (
-            <WinLossAnswer key={i} colorIndex={codeColor} />
-          ))}
+          {gameState.game.code.code.map(
+            (codeColor: number, i: Key | null | undefined) => (
+              <WinLossAnswer key={i} colorIndex={codeColor} />
+            ),
+          )}
         </div>
       </div>
     </motion.div>

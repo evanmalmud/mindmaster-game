@@ -1,9 +1,9 @@
 export const masterMindColors = [
-  'bg-ctp-red',
-  'bg-ctp-blue',
-  'bg-ctp-peach',
-  'bg-ctp-yellow',
-  'bg-ctp-green',
+  'bg-guess-red',
+  'bg-guess-blue',
+  'bg-guess-peach',
+  'bg-guess-yellow',
+  'bg-guess-green',
 ];
 
 //TODO:
