@@ -1,3 +1,4 @@
+import { Code, Game } from '@prisma/client';
 import type { JsonArray, JsonValue } from '@prisma/client/runtime/library';
 import { z } from 'zod';
 
