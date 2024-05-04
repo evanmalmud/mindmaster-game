@@ -1,14 +1,15 @@
 import type { ShouldRevalidateFunctionArgs } from '@remix-run/react';
-import { Form } from '@remix-run/react';
+import { Form, Link, useLocation } from '@remix-run/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 
 import { Toaster } from '~/components/ui/toaster';
 import { useToast } from '~/components/ui/use-toast';
 import { masterMindColors } from '~/lib/constants';
-import { GameRow, GameSubmitButton } from '~/routes/_default.game/gamerow';
+import { GameRow, GameSubmitButton } from '~/routes/game/gamerow';
 import { cn } from '~/utils';
 
+import { HowToPlay } from './howToPlay';
 import {
   action,
   loader,
@@ -38,6 +39,10 @@ export default function Game() {
   const { toast } = useToast();
   const actionData = useGameRouteAction();
 
+  const { state } = useLocation();
+
+  console.log(state);
+
   // Toast for actions that return an error (mostly for dev purposes)
   useEffect(() => {
     if (actionData && !actionData?.ok) {
@@ -51,7 +56,23 @@ export default function Game() {
   return (
     <>
       <div className="flex min-h-dvh flex-col">
+        <header className="sticky top-0 border-b border-neutral-400">
+          <div className="container px-4 py-2">
+            <Link to="/">
+              <motion.h1
+                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: -700 }}
+                transition={{ type: 'spring', stiffness: 35, duration: 0.3 }}
+                className="font-display text-lg uppercase lg:text-2xl"
+              >
+                Mastermind
+              </motion.h1>
+            </Link>
+          </div>
+        </header>
+
         <main className="mt-10 flex flex-auto flex-col md:mt-0 md:items-center md:justify-center">
+          {state?.howToPlay ? <HowToPlay /> : null}
           <Form method="post" className="flex flex-col items-center gap-y-8">
             <div className="container px-4">
               <motion.div
