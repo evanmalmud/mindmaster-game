@@ -44,7 +44,6 @@
     "remix-auth-google": "^2.0.0",
     "remix-auth-oauth2": "^1.11.1",
     "remix-auth-totp": "^3.0.0",
-    "styled-components": "^6.1.9",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.8.9",
