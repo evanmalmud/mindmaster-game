@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { Toaster } from '~/components/ui/toaster';
 import { useToast } from '~/components/ui/use-toast';
 import { masterMindColors } from '~/lib/constants';
-import { GameRow, GameSubmitButton } from '~/routes/game/gamerow';
+import { GameRow, GameSubmitButton } from '~/routes/_default.game/gamerow';
 import { cn } from '~/utils';
 
 import { HowToPlay } from './howToPlay';
