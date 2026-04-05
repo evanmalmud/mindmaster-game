@@ -4,30 +4,33 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: plot_points
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: mind_master
     volumes:
       - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 3s
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mind_master"]
+      interval: 10s
+      timeout: 5s
       retries: 5
+    networks:
+      - mindmaster-network
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mindmaster.rule=Host(`mindmaster.sleepydonut.com`)"
+      - "traefik.http.routers.mindmaster.entrypoints=web"
+      - "traefik.http.services.mindmaster.loadbalancer.server.port=3000"
     depends_on:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: "postgres://postgres:postgres@db:5432/plot_points"
+      DATABASE_URL: "postgres://postgres:postgres@db:5432/mind_master"
       SESSION_SECRET: "local-dev-session-secret-change-in-production"
       ENCRYPTION_SECRET: "local-dev-encryption-secret-min-length"
       RESEND_API_KEY: "re_placeholder_local_dev"
@@ -39,6 +42,14 @@ services:
       AUTH0_CALLBACK_URL: "http://localhost:3000/auth/auth0/callback"
       AUTH0_DOMAIN_URL: "${AUTH0_DOMAIN_URL:-https://placeholder.auth0.com}"
       NODE_ENV: "production"
+    networks:
+      - mindmaster-network
+      - mediastack
 
 volumes:
   pgdata:
+networks:
+  mindmaster-network:
+    driver: bridge
+  mediastack:
+    external: true
