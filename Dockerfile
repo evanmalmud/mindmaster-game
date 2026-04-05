@@ -4,8 +4,6 @@ FROM node:${NODE_VERSION}-bullseye-slim as base
 
 # Set production environment for base and all layers that inherit it
 ENV NODE_ENV="production"
-LABEL fly_launch_runtime="Remix"
-
 # Install openssl for Prisma
 RUN apt-get update -qq && apt-get install -y openssl
 
@@ -51,7 +49,6 @@ COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
 COPY --from=build /app/build /app/build
 COPY --from=build /app/public /app/public
 COPY --from=build /app/package.json /app/package.json
-COPY --from=build /app/scripts /app/scripts
 COPY --from=build /app/prisma /app/prisma
 
 CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
