@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
 
-import { masterMindColors } from '~/lib/constants';
+import { colorblindSymbols, masterMindColors } from '~/lib/constants';
+import { useTheme } from '~/lib/theme';
 import { cn } from '~/utils';
 
 import { useGameState } from './route.handlers';
@@ -53,6 +54,7 @@ function GameButton({
   isActive: boolean;
 }) {
   const [buttonState, setButtonState] = useState(initialValue);
+  const { colorblind } = useTheme();
 
   function onClick() {
     if (!isActive) {
@@ -82,12 +84,17 @@ function GameButton({
           'size-14 select-none sm:size-16 lg:size-24',
           masterMindColors[buttonState],
           {
-            // disabled button styles
             'cursor-not-allowed opacity-50': !isActive,
           },
         )}
       >
-        <span className="sr-only">{masterMindColors[buttonState]}</span>
+        {colorblind ? (
+          <span className="text-lg font-bold text-neutral-900 lg:text-2xl">
+            {colorblindSymbols[buttonState]}
+          </span>
+        ) : (
+          <span className="sr-only">{masterMindColors[buttonState]}</span>
+        )}
       </BaseButton>
     </>
   );
@@ -106,6 +113,13 @@ const resultText: Record<ResultType, string> = {
   incorrect: 'Wrong wrong wrong',
   correctColor: 'Correct color',
   correctColorAndSpot: 'Correct color and spot',
+  idle: '',
+};
+
+const resultSymbol: Record<ResultType, string> = {
+  incorrect: '✕',
+  correctColor: '~',
+  correctColorAndSpot: '✓',
   idle: '',
 };
 
@@ -135,6 +149,8 @@ export function GameResultDot({
   index: number;
   type: ResultType;
 }) {
+  const { colorblind } = useTheme();
+
   return (
     <div>
       <motion.div
@@ -150,7 +166,7 @@ export function GameResultDot({
             delay: index * 0.1,
           }}
           className={cn(
-            'absolute left-0 top-0 h-full w-full rounded-full border border-neutral-700 bg-black',
+            'absolute left-0 top-0 flex h-full w-full items-center justify-center rounded-full border border-neutral-700 bg-black',
             {
               'bg-code-gray': type === 'incorrect',
               'bg-code-yellow': type === 'correctColor',
@@ -158,7 +174,13 @@ export function GameResultDot({
               'bg-neutral-50': type === 'idle',
             },
           )}
-        />
+        >
+          {colorblind && type !== 'idle' && (
+            <span className="text-[10px] font-bold text-white lg:text-xs">
+              {resultSymbol[type]}
+            </span>
+          )}
+        </motion.div>
         <span className="sr-only">{resultText[type]}</span>
       </motion.div>
     </div>
@@ -176,7 +198,6 @@ function BaseButton({
   return (
     <motion.button
       {...props}
-      // Framer.animation props
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
       transition={{
@@ -189,9 +210,6 @@ function BaseButton({
         'font-matter group rounded-full border-2 border-neutral-700 shadow-input-idle will-change-transform',
         className,
         {
-          // can only apply the transition styles needed for clicking the
-          // button after framer is done animating them in. otherwise they
-          // conflict with the animation styles framer is trying to set.
           'transition-all duration-150 ease-in-out active:translate-y-[2px] active:shadow-input-shrink active:duration-100 md:hover:translate-y-[-2px] md:hover:shadow-input-grow md:active:shadow-input-shrink md:active:duration-100':
             !props.disabled && !isAnimating,
           'cursor-not-allowed': props.disabled,

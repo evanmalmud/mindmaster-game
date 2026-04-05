@@ -63,11 +63,16 @@ export default function Login() {
             </Button>
           </Form>
 
-          <Form action="/auth/auth0" method="post" className="mt-12">
-            <Button className="w-full py-4">Login with Auth0</Button>
-          </Form>
+          <div className="relative mt-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-neutral-600" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or</span>
+            </div>
+          </div>
 
-          <Form action="/auth/google" method="post">
+          <Form action="/auth/google" method="post" className="mt-4">
             <Button className="w-full py-4">Login with Google</Button>
           </Form>
         </CardContent>

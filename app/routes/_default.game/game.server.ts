@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 import { db } from '~/services/db.server';
 
-import { createCode } from '../../lib/code';
+import { createDailyCode, getPuzzleDate } from '../../lib/code';
 
 import { RESULT_MAP, calculateResult } from './game';
 
@@ -54,30 +54,31 @@ export async function getGame(id: number) {
   return toParsedGame(game);
 }
 
-export async function findMostRecentUnfinishedGameByUserId(userId?: string) {
-  if (!userId) {
-    return createGame(userId);
+/**
+ * Finds or creates today's daily puzzle game for a user.
+ * If no userId, creates an anonymous daily game (tracked by cookie on the client).
+ */
+export async function findOrCreateDailyGame(userId?: string) {
+  const puzzleDate = getPuzzleDate();
+
+  if (userId) {
+    const existing = await db.game.findUnique({
+      where: {
+        userId_puzzleDate: { userId, puzzleDate },
+      },
+      include: { code: true },
+    });
+
+    if (existing) {
+      return toParsedGame(existing);
+    }
   }
 
-  const games = await db.game.findMany({
-    where: {
-      userId,
-      isWinner: false,
-    },
-    include: {
-      code: true,
-    },
-  });
-
-  const firstUnfinishedGame = games
-    .map((g) => ({ ...g, submissions: parseSubmissions(g.submissions) }))
-    .find((g) => g.submissions.length < g.maxGuesses);
-
-  return firstUnfinishedGame ?? createGame(userId);
+  return createDailyGame(puzzleDate, userId);
 }
 
-export async function createGame(userId?: string) {
-  const code = createCode();
+async function createDailyGame(puzzleDate: string, userId?: string) {
+  const code = createDailyCode(puzzleDate);
   const submissions: JsonArray = [];
 
   const game = await db.game.create({
@@ -85,12 +86,12 @@ export async function createGame(userId?: string) {
       isWinner: false,
       maxGuesses: 6,
       submissions,
+      puzzleDate,
       code: {
         create: {
           code,
         },
       },
-      // If user id exists, connect the game to a user
       ...(userId ? { user: { connect: { id: userId } } } : null),
     },
     include: {
@@ -99,6 +100,84 @@ export async function createGame(userId?: string) {
   });
 
   return toParsedGame(game);
+}
+
+/**
+ * Get user stats for the stats page.
+ */
+export async function getUserStats(userId: string) {
+  const games = await db.game.findMany({
+    where: {
+      userId,
+      puzzleDate: { not: null },
+    },
+    orderBy: { puzzleDate: 'desc' },
+    include: { code: true },
+  });
+
+  const completed = games.filter(
+    (g) => g.isWinner || parseSubmissions(g.submissions).length >= g.maxGuesses,
+  );
+  const wins = completed.filter((g) => g.isWinner);
+
+  // Guess distribution (1-6)
+  const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+  for (const game of wins) {
+    const subs = parseSubmissions(game.submissions);
+    const guesses = subs.length;
+    if (guesses >= 1 && guesses <= 6) {
+      distribution[guesses]++;
+    }
+  }
+
+  // Streak calculation
+  let currentStreak = 0;
+  let maxStreak = 0;
+  let tempStreak = 0;
+
+  // Sort by date ascending for streak calculation
+  const sortedDates = completed
+    .filter((g) => g.isWinner && g.puzzleDate)
+    .map((g) => g.puzzleDate!)
+    .sort();
+
+  for (let i = 0; i < sortedDates.length; i++) {
+    if (i === 0) {
+      tempStreak = 1;
+    } else {
+      const prev = new Date(sortedDates[i - 1]);
+      const curr = new Date(sortedDates[i]);
+      const diffDays = Math.round(
+        (curr.getTime() - prev.getTime()) / (24 * 60 * 60 * 1000),
+      );
+      tempStreak = diffDays === 1 ? tempStreak + 1 : 1;
+    }
+    maxStreak = Math.max(maxStreak, tempStreak);
+  }
+
+  // Check if current streak is still active (includes today or yesterday)
+  const today = getPuzzleDate();
+  const yesterday = getPuzzleDate(
+    new Date(Date.now() - 24 * 60 * 60 * 1000),
+  );
+
+  if (sortedDates.length > 0) {
+    const lastWinDate = sortedDates[sortedDates.length - 1];
+    if (lastWinDate === today || lastWinDate === yesterday) {
+      currentStreak = tempStreak;
+    }
+  }
+
+  return {
+    totalGames: completed.length,
+    totalWins: wins.length,
+    winPercentage: completed.length > 0
+      ? Math.round((wins.length / completed.length) * 100)
+      : 0,
+    currentStreak,
+    maxStreak,
+    distribution,
+  };
 }
 
 export type ParsedGame = ReturnType<typeof toParsedGame>;

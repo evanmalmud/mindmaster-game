@@ -4,6 +4,7 @@
  
 @layer base {
   :root {
+    --shadow-color: #c0c0c0;
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
 
@@ -36,6 +37,7 @@
   }
  
   .dark {
+    --shadow-color: #141414;
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
  

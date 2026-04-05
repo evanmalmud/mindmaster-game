@@ -1,21 +1,61 @@
-import type { ActionFunctionArgs } from '@remix-run/node';
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { useActionData, useLoaderData } from '@remix-run/react';
 import { z } from 'zod';
 
+import { getPuzzleDate, getPuzzleNumber } from '~/lib/code';
+import { authenticator } from '~/services/auth.server';
+import {
+  getStatsFromCookie,
+  statsCookie,
+  updateCookieStatsAfterGame,
+} from '~/services/stats-cookie.server';
+
 import {
   addGameSubmission,
-  createGame,
+  findOrCreateDailyGame,
+  getGame,
 } from '~/routes/_default.game/game.server';
 import type {
   ParsedGame,
   Submission,
 } from '~/routes/_default.game/game.server';
 
-export async function loader() {
-  const game = await createGame();
+export async function loader({ request }: LoaderFunctionArgs) {
+  const user = await authenticator.isAuthenticated(request);
+  const puzzleDate = getPuzzleDate();
+  const puzzleNumber = getPuzzleNumber(puzzleDate);
 
-  return json(toGameState(game));
+  if (user) {
+    const game = await findOrCreateDailyGame(user.id);
+    return json({ ...toGameState(game), puzzleNumber, puzzleDate });
+  }
+
+  // Anonymous user: check cookie for an existing game
+  const stats = await getStatsFromCookie(request);
+
+  if (stats.currentGameId && stats.currentPuzzleDate === puzzleDate) {
+    try {
+      const game = await getGame(stats.currentGameId);
+      return json({ ...toGameState(game), puzzleNumber, puzzleDate });
+    } catch {
+      // Game not found, create a new one
+    }
+  }
+
+  // Create new anonymous game and store its ID in the cookie
+  const game = await findOrCreateDailyGame();
+  stats.currentGameId = game.id;
+  stats.currentPuzzleDate = puzzleDate;
+
+  return json(
+    { ...toGameState(game), puzzleNumber, puzzleDate },
+    {
+      headers: {
+        'Set-Cookie': await statsCookie.serialize(stats),
+      },
+    },
+  );
 }
 
 export type GameRouteLoader = typeof loader;
@@ -34,7 +74,6 @@ export async function action({ request }: ActionFunctionArgs) {
   try {
     const formData = await request.formData();
 
-    // Validate inputs
     const { gameId, submission } = z
       .object({
         gameId: z.number(),
@@ -47,6 +86,26 @@ export async function action({ request }: ActionFunctionArgs) {
 
     const game = await addGameSubmission(gameId, submission);
     response.gameState = toGameState(game);
+
+    // If anonymous user and game just ended, update cookie stats
+    const user = await authenticator.isAuthenticated(request);
+    if (!user && response.gameState.isGameOver) {
+      const stats = await getStatsFromCookie(request);
+      const completedSubs = game.submissions.filter((s) => s.result.length > 0);
+      const puzzleDate = game.puzzleDate ?? getPuzzleDate();
+      const updated = updateCookieStatsAfterGame(
+        stats,
+        game.isWinner,
+        completedSubs.length,
+        puzzleDate,
+      );
+
+      return json(response, {
+        headers: {
+          'Set-Cookie': await statsCookie.serialize(updated),
+        },
+      });
+    }
 
     return json(response);
   } catch (e) {
@@ -80,7 +139,7 @@ type GameState = {
   isGameOver: boolean;
 };
 
-function toGameState(game: Awaited<ReturnType<typeof createGame>>): GameState {
+function toGameState(game: ParsedGame): GameState {
   const isGameOver =
     game.isWinner || game.submissions.length >= game.maxGuesses;
 
@@ -88,8 +147,9 @@ function toGameState(game: Awaited<ReturnType<typeof createGame>>): GameState {
     activeRow: isGameOver ? -1 : game.submissions.length,
     game: {
       ...game,
-      // If game isn't over, we attach a new submission for the user to interact
-      // with
+      // Only send the secret code to the client when the game is over (for answer reveal).
+      // This prevents users from viewing source to cheat.
+      code: isGameOver ? game.code : { id: game.code.id, code: [] },
       submissions: isGameOver
         ? game.submissions
         : game.submissions.concat(createNewSubmission()),

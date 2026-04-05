@@ -6,6 +6,8 @@ export const masterMindColors = [
   'bg-guess-green',
 ];
 
-//TODO:
+// Symbols shown on color circles in colorblind mode
+export const colorblindSymbols = ['●', '▲', '◆', '■', '★'];
 
-// Use DB for Game state
+// Human-readable color names
+export const colorNames = ['Red', 'Blue', 'Peach', 'Yellow', 'Green'];

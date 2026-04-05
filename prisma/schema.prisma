@@ -31,8 +31,13 @@ model Game {
 
   submissions Json
 
+  puzzleDate String?
+  createdAt  DateTime @default(now())
+
   codeId Int
   code   Code    @relation(fields: [codeId], references: [id])
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, puzzleDate])
 }

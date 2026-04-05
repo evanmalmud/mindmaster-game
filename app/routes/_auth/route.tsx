@@ -15,13 +15,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function AuthLayout() {
   return (
     <>
-      <header className="sticky top-0 grid grid-cols-3 items-center border-b border-neutral-400 px-4 py-2 md:py-4">
+      <header className="sticky top-0 z-40 grid grid-cols-3 items-center border-b border-neutral-400 bg-background/80 px-4 py-2 backdrop-blur-sm md:py-4">
         <Link to="/">
           <ArrowLeftCircleIcon />
         </Link>
 
         <h1 className="justify-self-center font-display text-lg uppercase md:text-2xl">
-          Mastermind
+          MindMaster
         </h1>
       </header>
 

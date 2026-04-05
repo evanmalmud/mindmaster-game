@@ -9,6 +9,7 @@ import {
   ScrollRestoration,
 } from '@remix-run/react';
 
+import { ThemeProvider } from '~/lib/theme';
 import styles from '~/tailwind.css';
 
 export function links(): ReturnType<LinksFunction> {
@@ -23,17 +24,20 @@ export function links(): ReturnType<LinksFunction> {
     ...(cssBundleHref ? [{ rel: 'stylesheet', href: cssBundleHref }] : []),
   ];
 }
+
 export default function App() {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
-      <body>
-        <Outlet />
+      <body className="bg-background text-foreground transition-colors duration-200">
+        <ThemeProvider>
+          <Outlet />
+        </ThemeProvider>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

@@ -34,7 +34,7 @@ WORKDIR /app
 
 COPY --from=deps /app/node_modules /app/node_modules
 
-ADD prisma .
+ADD prisma prisma
 RUN npx prisma generate
 
 ADD . .
@@ -54,4 +54,6 @@ COPY --from=build /app/package.json /app/package.json
 COPY --from=build /app/scripts /app/scripts
 COPY --from=build /app/prisma /app/prisma
 
-CMD ["npm", "start"]
+RUN chmod +x /app/scripts/docker-entrypoint.sh
+
+CMD ["/app/scripts/docker-entrypoint.sh"]

@@ -4,6 +4,7 @@ import { Link, useLoaderData } from '@remix-run/react';
 import { motion } from 'framer-motion';
 import type { ComponentProps } from 'react';
 
+import { getPuzzleDate, getPuzzleNumber } from '~/lib/code';
 import { authenticator } from '~/services/auth.server';
 
 import { Header } from '../_default/header';
@@ -19,12 +20,13 @@ export function meta() {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await authenticator.isAuthenticated(request);
+  const puzzleNumber = getPuzzleNumber(getPuzzleDate());
 
-  return json({ user });
+  return json({ user, puzzleNumber });
 }
 
 export default function Index() {
-  const { user } = useLoaderData<typeof loader>();
+  const { user, puzzleNumber } = useLoaderData<typeof loader>();
 
   return (
     <>
@@ -38,12 +40,21 @@ export default function Index() {
             transition={{ duration: 0.5 }}
             className="font-display text-6xl uppercase"
           >
-            Mastermind
+            MindMaster
           </motion.h1>
 
           <Subtitle />
 
-          <div className="mt-16 grid grid-cols-1 items-center gap-8 lg:grid-cols-3">
+          <motion.p
+            animate={{ opacity: 1 }}
+            initial={{ opacity: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="mt-6 text-sm text-muted-foreground"
+          >
+            Daily Puzzle #{puzzleNumber}
+          </motion.p>
+
+          <div className="mt-10 grid grid-cols-1 items-center gap-6 lg:grid-cols-3">
             <motion.div
               animate={{ opacity: 1, y: 0 }}
               initial={{ opacity: 0, y: 100 }}
@@ -67,9 +78,7 @@ export default function Index() {
                 stiffness: 100,
               }}
             >
-              <Button to={user ? '/stats' : '/login'}>
-                {user ? 'View Stats' : 'Log In'}
-              </Button>
+              <Button to={'/stats'}>View Stats</Button>
             </motion.div>
             <motion.div
               animate={{ opacity: 1, y: 0 }}
