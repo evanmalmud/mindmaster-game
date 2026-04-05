@@ -1,7 +1,5 @@
-// app/utils/auth.server.ts
 import type { User } from '@prisma/client';
 import { Authenticator } from 'remix-auth';
-import { Auth0Strategy } from 'remix-auth-auth0';
 import { GoogleStrategy } from 'remix-auth-google';
 import { TOTPStrategy } from 'remix-auth-totp';
 
@@ -18,31 +16,6 @@ import { db } from './db.server';
 import { sendAuthEmail } from './email.server';
 
 export const authenticator = new Authenticator<User>(sessionStorage);
-
-const auth0Strategy = new Auth0Strategy(
-  {
-    callbackURL: process.env.AUTH0_CALLBACK_URL!,
-    clientID: process.env.AUTH0_CLIENT_ID!,
-    clientSecret: process.env.AUTH0_CLIENT_SECRET!,
-    domain: process.env.AUTH0_DOMAIN_URL!,
-  },
-  async ({ profile }) => {
-    const email = profile.emails?.[0].value ?? '';
-
-    return db.user.upsert({
-      where: {
-        email,
-      },
-      create: {
-        email,
-        name: profile.displayName!,
-      },
-      update: {},
-    });
-  },
-);
-
-authenticator.use(auth0Strategy);
 
 const googleStrategy = new GoogleStrategy(
   {

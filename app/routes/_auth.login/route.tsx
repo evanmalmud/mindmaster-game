@@ -72,7 +72,7 @@ export default function Login() {
             </div>
           </div>
 
-          <Form action="/auth/google" method="post" className="mt-4">
+          <Form action="/api/auth/google" method="post" className="mt-4">
             <Button className="w-full py-4">Login with Google</Button>
           </Form>
         </CardContent>
