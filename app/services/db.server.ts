@@ -1,18 +1,20 @@
-// app/utils/db.server.ts
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 
 import { NODE_ENV } from '~/config/env.server';
 
+function createClient() {
+  const adapter = new PrismaPg(process.env.DATABASE_URL!);
+  return new PrismaClient({ adapter });
+}
+
 let db: PrismaClient;
 
-// this is needed because in development we don't want to restart
-// the server with every change, but we want to make sure we don't
-// create a new connection to the DB with every change either.
 if (NODE_ENV === 'production') {
-  db = new PrismaClient();
+  db = createClient();
 } else {
   if (!global.__db) {
-    global.__db = new PrismaClient();
+    global.__db = createClient();
   }
   db = global.__db;
 }

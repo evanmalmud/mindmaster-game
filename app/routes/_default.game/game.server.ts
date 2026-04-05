@@ -1,5 +1,4 @@
-import { Code, Game } from '@prisma/client';
-import type { JsonArray, JsonValue } from '@prisma/client/runtime/library';
+import { Code, Game, Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 import { db } from '~/services/db.server';
@@ -79,7 +78,7 @@ export async function findOrCreateDailyGame(userId?: string) {
 
 async function createDailyGame(puzzleDate: string, userId?: string) {
   const code = createDailyCode(puzzleDate);
-  const submissions: JsonArray = [];
+  const submissions: Prisma.InputJsonValue[] = [];
 
   const game = await db.game.create({
     data: {
@@ -189,7 +188,7 @@ function toParsedGame(game: Game & { code: Code }) {
   };
 }
 
-function parseSubmissions(value: JsonValue): Submission[] {
+function parseSubmissions(value: unknown): Submission[] {
   if (!Array.isArray(value)) {
     return [];
   }
