@@ -54,6 +54,4 @@ COPY --from=build /app/package.json /app/package.json
 COPY --from=build /app/scripts /app/scripts
 COPY --from=build /app/prisma /app/prisma
 
-RUN sed -i 's/\r$//' /app/scripts/docker-entrypoint.sh && chmod +x /app/scripts/docker-entrypoint.sh
-
-CMD ["/app/scripts/docker-entrypoint.sh"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
