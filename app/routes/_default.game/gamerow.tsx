@@ -165,14 +165,14 @@ export function GameResultDot({
       <motion.div
         animate={{ scale: 1 }}
         initial={{ scale: 0 }}
-        transition={{ delay: 0.6 + index * 0.1 }}
+        transition={{ delay: 0.15 + index * 0.06 }}
         className="relative size-6 rounded-full border-2 border-neutral-700 bg-black will-change-transform lg:size-8"
       >
         <motion.div
           animate={{ y: type === 'idle' ? -1 : -3 }}
           initial={{ y: -1 }}
           transition={{
-            delay: index * 0.1,
+            delay: index * 0.06,
           }}
           className={cn(
             'absolute left-0 top-0 flex h-full w-full items-center justify-center rounded-full border border-neutral-700 bg-black',

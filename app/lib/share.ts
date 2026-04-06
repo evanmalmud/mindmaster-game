@@ -3,7 +3,7 @@ import type { Submission } from '~/routes/_default.game/game.server';
 const RESULT_EMOJI: Record<number, string> = {
   1: '🟢',   // correct color and spot
   0: '🟡',   // correct color
-  '-1': '⬛', // incorrect
+  '-1': '🩶', // incorrect
 };
 
 const RESULT_EMOJI_COLORBLIND: Record<number, string> = {

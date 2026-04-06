@@ -151,6 +151,12 @@ function toGameState(game: ParsedGame): GameState {
   const isGameOver =
     game.isWinner || game.submissions.length >= game.maxGuesses;
 
+  // Carry forward the previous guess's colors for the new active row
+  const lastGuess =
+    game.submissions.length > 0
+      ? game.submissions[game.submissions.length - 1].code
+      : [0, 0, 0, 0];
+
   return {
     activeRow: isGameOver ? -1 : game.submissions.length,
     game: {
@@ -158,15 +164,8 @@ function toGameState(game: ParsedGame): GameState {
       code: isGameOver ? game.code : { id: game.code.id, code: [] },
       submissions: isGameOver
         ? game.submissions
-        : game.submissions.concat(createNewSubmission()),
+        : game.submissions.concat({ code: [...lastGuess], result: [] }),
     },
     isGameOver,
-  };
-}
-
-function createNewSubmission(): Submission {
-  return {
-    code: [0, 0, 0, 0],
-    result: [],
   };
 }
