@@ -67,15 +67,14 @@ function GameButton({
   const [buttonState, setButtonState] = useState(initialValue);
   const { colorblind } = useTheme();
 
-  function onClick() {
-    if (!isActive) {
-      return;
-    }
-    if (buttonState + 1 >= masterMindColors.length) {
-      setButtonState(0);
-    } else {
-      setButtonState(buttonState + 1);
-    }
+  function cycleForward() {
+    if (!isActive) return;
+    setButtonState((prev) => (prev + 1) % masterMindColors.length);
+  }
+
+  function cycleBackward() {
+    if (!isActive) return;
+    setButtonState((prev) => (prev - 1 + masterMindColors.length) % masterMindColors.length);
   }
 
   return (
@@ -86,7 +85,11 @@ function GameButton({
 
       <BaseButton
         disabled={!isActive}
-        onClick={onClick}
+        onClick={cycleForward}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          cycleBackward();
+        }}
         type="button"
         transition={{
           delay: MOTION_DELAY[index],
