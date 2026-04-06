@@ -1,7 +1,7 @@
 import type { ShouldRevalidateFunctionArgs } from '@remix-run/react';
 import { Form, Link } from '@remix-run/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Key, useEffect, useState } from 'react';
+import { Key, useEffect, useRef, useState } from 'react';
 
 import { Confetti } from '~/components/confetti';
 import { Toaster } from '~/components/ui/toaster';
@@ -34,12 +34,36 @@ export function shouldRevalidate({
   return defaultShouldRevalidate;
 }
 
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function useTimer(isGameOver: boolean) {
+  const [elapsed, setElapsed] = useState(0);
+  const startTime = useRef(Date.now());
+
+  useEffect(() => {
+    if (isGameOver) return;
+
+    const interval = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startTime.current) / 1000));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isGameOver]);
+
+  return elapsed;
+}
+
 export default function Game() {
   const gameState = useGameState();
   const loaderData = useGameRouteLoader();
   const { toast } = useToast();
   const actionData = useGameRouteAction();
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const elapsed = useTimer(gameState.isGameOver);
 
   useEffect(() => {
     if (actionData && !actionData?.ok) {
@@ -50,17 +74,24 @@ export default function Game() {
     }
   }, [actionData, toast]);
 
+  const solveTime = actionData?.solveTimeSeconds;
+
   return (
     <>
       {gameState.isGameOver && gameState.game.isWinner && <Confetti />}
 
       <div className="flex min-h-dvh flex-col">
-        <main className="flex flex-auto flex-col md:-mt-16 md:items-center md:justify-center">
-          {/* Daily puzzle header */}
+        <main className="flex flex-auto flex-col items-center md:justify-center">
+          {/* Daily puzzle header + timer */}
           <div className="flex items-center justify-center gap-4 py-3">
             <span className="font-display text-sm uppercase tracking-wider text-muted-foreground">
               Daily #{loaderData.puzzleNumber}
             </span>
+            {!gameState.isGameOver && (
+              <span className="font-mono text-sm tabular-nums text-muted-foreground">
+                {formatTime(elapsed)}
+              </span>
+            )}
             <button
               type="button"
               onClick={() => setShowHowToPlay(true)}
@@ -70,11 +101,11 @@ export default function Game() {
             </button>
           </div>
 
-          <Form method="post" className="flex flex-col items-center gap-y-8">
-            <div className="container px-4">
+          <Form method="post" className="flex w-full flex-col items-center gap-y-6">
+            <div className="w-full px-3 sm:px-4">
               <motion.div
-                animate={{ scale: gameState.isGameOver ? 0.7 : 1 }}
-                className="mx-auto flex h-[362px] max-w-[400px] flex-col gap-y-4 rounded-xl border border-solid border-neutral-600 bg-card p-2 text-card-foreground shadow sm:h-[402px] lg:h-[675px] lg:max-w-lg"
+                animate={{ scale: gameState.isGameOver ? 0.75 : 1 }}
+                className="mx-auto flex max-w-lg flex-col gap-y-2 rounded-xl border border-solid border-neutral-600 bg-card p-2 text-card-foreground shadow sm:gap-y-3 sm:p-3 lg:gap-y-4 lg:p-4"
               >
                 <AnimatePresence>
                   {gameState.game.submissions.map((_: unknown, i: number) => (
@@ -84,11 +115,16 @@ export default function Game() {
               </motion.div>
             </div>
 
-            {!gameState.isGameOver ? <GameSubmitButton /> : null}
+            {!gameState.isGameOver ? (
+              <GameSubmitButton elapsed={elapsed} />
+            ) : null}
           </Form>
 
           {gameState.isGameOver ? (
-            <WinLossFooter puzzleNumber={loaderData.puzzleNumber} />
+            <WinLossFooter
+              puzzleNumber={loaderData.puzzleNumber}
+              solveTime={solveTime}
+            />
           ) : null}
         </main>
       </div>
@@ -99,7 +135,13 @@ export default function Game() {
   );
 }
 
-function WinLossFooter({ puzzleNumber }: { puzzleNumber: number }) {
+function WinLossFooter({
+  puzzleNumber,
+  solveTime,
+}: {
+  puzzleNumber: number;
+  solveTime?: number;
+}) {
   const gameState = useGameState();
   const { toast } = useToast();
   const { colorblind } = useTheme();
@@ -117,6 +159,7 @@ function WinLossFooter({ puzzleNumber }: { puzzleNumber: number }) {
       gameState.game.isWinner,
       gameState.game.maxGuesses,
       colorblind,
+      solveTime,
     );
     toast({
       title: result === 'shared' ? 'Shared!' : 'Copied to clipboard!',
@@ -133,6 +176,7 @@ function WinLossFooter({ puzzleNumber }: { puzzleNumber: number }) {
       completedSubmissions,
       gameState.game.isWinner,
       gameState.game.maxGuesses,
+      solveTime,
     );
     setShareImageUrl(url);
   }
@@ -151,11 +195,16 @@ function WinLossFooter({ puzzleNumber }: { puzzleNumber: number }) {
       initial={{ opacity: 0, y: 300 }}
       transition={{ type: 'spring', stiffness: 35, duration: 0.3 }}
     >
-      <div className="flex flex-col items-center justify-center gap-4 pb-8">
-        <div className="flex flex-row items-center justify-center gap-6">
+      <div className="flex flex-col items-center justify-center gap-4 pb-8 pt-4">
+        <div className="flex flex-col items-center gap-1">
           <h1 className="text-center font-display text-6xl uppercase">
             {decision}
           </h1>
+          {solveTime != null && gameState.game.isWinner && (
+            <span className="font-mono text-lg text-muted-foreground">
+              {formatTime(solveTime)}
+            </span>
+          )}
         </div>
 
         {/* Answer reveal */}
@@ -224,7 +273,7 @@ function WinLossAnswer({ colorIndex }: { colorIndex: number }) {
   return (
     <div
       className={cn(
-        'flex size-14 select-none items-center justify-center rounded-full border-2 border-neutral-700 shadow-input-idle sm:size-16 lg:size-24',
+        'flex size-12 select-none items-center justify-center rounded-full border-2 border-neutral-700 shadow-input-idle sm:size-14 lg:size-20',
         masterMindColors[colorIndex],
       )}
     >

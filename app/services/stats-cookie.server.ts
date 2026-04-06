@@ -11,6 +11,8 @@ export type CookieStats = {
   maxStreak: number;
   lastWinDate: string | null;
   distribution: Record<number, number>;
+  lastSolveTime: number | null; // seconds
+  bestSolveTime: number | null; // seconds
 };
 
 const defaultStats: CookieStats = {
@@ -22,6 +24,8 @@ const defaultStats: CookieStats = {
   maxStreak: 0,
   lastWinDate: null,
   distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
+  lastSolveTime: null,
+  bestSolveTime: null,
 };
 
 export const statsCookie = createCookie('mindmaster-stats', {
@@ -39,7 +43,6 @@ export async function getStatsFromCookie(
   if (!cookie || typeof cookie !== 'object') {
     return { ...defaultStats, distribution: { ...defaultStats.distribution } };
   }
-  // Merge with defaults to handle missing fields from older cookies
   return {
     ...defaultStats,
     ...cookie,
@@ -55,16 +58,24 @@ export function updateCookieStatsAfterGame(
   isWinner: boolean,
   guesses: number,
   puzzleDate: string,
+  solveTimeSeconds?: number,
 ): CookieStats {
   const updated = { ...stats, distribution: { ...stats.distribution } };
 
   updated.totalGames++;
-  updated.currentGameId = null;
-  updated.currentPuzzleDate = null;
+  // Keep currentGameId/puzzleDate so the cookie knows the game is done
+  // but mark it as completed by setting the date still
 
   if (isWinner) {
     updated.totalWins++;
     updated.distribution[guesses] = (updated.distribution[guesses] ?? 0) + 1;
+
+    if (solveTimeSeconds) {
+      updated.lastSolveTime = solveTimeSeconds;
+      if (!updated.bestSolveTime || solveTimeSeconds < updated.bestSolveTime) {
+        updated.bestSolveTime = solveTimeSeconds;
+      }
+    }
 
     // Streak logic
     if (updated.lastWinDate) {
@@ -81,7 +92,6 @@ export function updateCookieStatsAfterGame(
     updated.maxStreak = Math.max(updated.maxStreak, updated.currentStreak);
     updated.lastWinDate = puzzleDate;
   } else {
-    // Loss breaks the streak
     updated.currentStreak = 0;
   }
 

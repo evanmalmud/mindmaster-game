@@ -63,6 +63,7 @@ export type GameRouteLoader = typeof loader;
 type ActionResponse = {
   ok: boolean;
   gameState: Awaited<GameState> | null;
+  solveTimeSeconds?: number;
 };
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -84,8 +85,14 @@ export async function action({ request }: ActionFunctionArgs) {
         submission: formData.getAll('answer').map((x) => Number(x)),
       });
 
+    const solveTimeSeconds = Number(formData.get('elapsed')) || 0;
+
     const game = await addGameSubmission(gameId, submission);
     response.gameState = toGameState(game);
+
+    if (response.gameState.isGameOver) {
+      response.solveTimeSeconds = solveTimeSeconds;
+    }
 
     // If anonymous user and game just ended, update cookie stats
     const user = await authenticator.isAuthenticated(request);
@@ -98,6 +105,7 @@ export async function action({ request }: ActionFunctionArgs) {
         game.isWinner,
         completedSubs.length,
         puzzleDate,
+        game.isWinner ? solveTimeSeconds : undefined,
       );
 
       return json(response, {
@@ -147,8 +155,6 @@ function toGameState(game: ParsedGame): GameState {
     activeRow: isGameOver ? -1 : game.submissions.length,
     game: {
       ...game,
-      // Only send the secret code to the client when the game is over (for answer reveal).
-      // This prevents users from viewing source to cheat.
       code: isGameOver ? game.code : { id: game.code.id, code: [] },
       submissions: isGameOver
         ? game.submissions

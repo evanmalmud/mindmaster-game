@@ -12,6 +12,12 @@ const RESULT_EMOJI_COLORBLIND: Record<number, string> = {
   '-1': '⬜',
 };
 
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 /**
  * Generates a Wordle-style share text for clipboard.
  */
@@ -21,9 +27,11 @@ export function generateShareText(
   isWinner: boolean,
   maxGuesses: number,
   colorblind: boolean = false,
+  solveTime?: number,
 ): string {
   const emoji = colorblind ? RESULT_EMOJI_COLORBLIND : RESULT_EMOJI;
   const score = isWinner ? `${submissions.length}/${maxGuesses}` : `X/${maxGuesses}`;
+  const timeStr = solveTime && isWinner ? ` ⏱ ${formatTime(solveTime)}` : '';
 
   const grid = submissions
     .map((sub) => sub.result.map((r) => emoji[r] ?? '⬛').join(''))
@@ -31,7 +39,7 @@ export function generateShareText(
 
   const url = typeof window !== 'undefined' ? window.location.origin : '';
 
-  return `MindMaster #${puzzleNumber} 🧠 ${score}\n\n${grid}\n\n${url}`;
+  return `MindMaster #${puzzleNumber} 🧠 ${score}${timeStr}\n\n${grid}\n\n${url}`;
 }
 
 /**
@@ -42,10 +50,11 @@ export function generateShareImage(
   submissions: Submission[],
   isWinner: boolean,
   maxGuesses: number,
+  solveTime?: number,
 ): string {
   const canvas = document.createElement('canvas');
   const width = 400;
-  const height = 320;
+  const height = 340;
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d')!;
@@ -62,11 +71,12 @@ export function generateShareImage(
   ctx.textAlign = 'center';
   ctx.fillText('MindMaster', width / 2, 40);
 
-  // Puzzle number and score
+  // Puzzle number, score, and time
   const score = isWinner ? `${submissions.length}/${maxGuesses}` : `X/${maxGuesses}`;
+  const timeStr = solveTime && isWinner ? `  ⏱ ${formatTime(solveTime)}` : '';
   ctx.fillStyle = '#a6adc8';
   ctx.font = '16px system-ui, -apple-system, sans-serif';
-  ctx.fillText(`#${puzzleNumber}  🧠  ${score}`, width / 2, 65);
+  ctx.fillText(`#${puzzleNumber}  🧠  ${score}${timeStr}`, width / 2, 65);
 
   // Result grid
   const dotSize = 28;
@@ -128,8 +138,9 @@ export async function shareResult(
   isWinner: boolean,
   maxGuesses: number,
   colorblind: boolean = false,
+  solveTime?: number,
 ): Promise<'copied' | 'shared'> {
-  const text = generateShareText(puzzleNumber, submissions, isWinner, maxGuesses, colorblind);
+  const text = generateShareText(puzzleNumber, submissions, isWinner, maxGuesses, colorblind, solveTime);
 
   if (navigator.share) {
     try {

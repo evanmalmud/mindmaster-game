@@ -15,32 +15,43 @@ export function GameRow({ index }: { index: number }) {
   const gameState = useGameState();
   const submission = gameState.game.submissions[index];
   const isActiveRow = index === gameState.activeRow;
+  const hasResult = submission.result.length > 0;
 
   return (
-    <div className="flex min-w-full flex-row gap-2">
+    <div className="flex min-w-full flex-row items-center gap-1.5 sm:gap-2">
       <input type="hidden" name="id" value={gameState.game.id} />
-      {submission.code.map((value: number, i: number) => (
-        <GameButton
-          key={i}
-          index={i}
-          initialValue={value}
-          isActive={isActiveRow}
-        />
-      ))}
+      <div className="flex flex-1 flex-row justify-center gap-1.5 sm:gap-2">
+        {submission.code.map((value: number, i: number) => (
+          <GameButton
+            key={i}
+            index={i}
+            initialValue={value}
+            isActive={isActiveRow}
+          />
+        ))}
+      </div>
 
-      <GameResults result={submission.result} />
+      {/* Only show result dots for submitted rows */}
+      {hasResult ? (
+        <GameResults result={submission.result} />
+      ) : (
+        <div className="w-[52px] shrink-0 sm:w-[60px] lg:w-[76px]" />
+      )}
     </div>
   );
 }
 
-export function GameSubmitButton() {
+export function GameSubmitButton({ elapsed }: { elapsed: number }) {
   return (
-    <BaseButton
-      type="submit"
-      className="bg-blue-500 px-8 py-2 font-bold text-white"
-    >
-      Submit
-    </BaseButton>
+    <>
+      <input type="hidden" name="elapsed" value={elapsed} />
+      <BaseButton
+        type="submit"
+        className="bg-blue-500 px-8 py-2.5 font-bold text-white"
+      >
+        Submit
+      </BaseButton>
+    </>
   );
 }
 
@@ -81,7 +92,7 @@ function GameButton({
           delay: MOTION_DELAY[index],
         }}
         className={cn(
-          'size-14 select-none sm:size-16 lg:size-24',
+          'size-16 select-none sm:size-[72px] lg:size-24',
           masterMindColors[buttonState],
           {
             'cursor-not-allowed opacity-50': !isActive,
@@ -89,7 +100,7 @@ function GameButton({
         )}
       >
         {colorblind ? (
-          <span className="text-lg font-bold text-neutral-900 lg:text-2xl">
+          <span className="text-xl font-bold text-neutral-900 sm:text-2xl lg:text-3xl">
             {colorblindSymbols[buttonState]}
           </span>
         ) : (
@@ -125,16 +136,14 @@ const resultSymbol: Record<ResultType, string> = {
 
 export function GameResults({ result }: { result: number[] }) {
   return (
-    <div className="ml-auto grid grid-cols-2 content-center justify-center gap-1 px-2">
-      {(result.length ? result : [...Array(4)]).map((value, i) => (
+    <div className="grid w-[52px] shrink-0 grid-cols-2 content-center justify-center gap-1 sm:w-[60px] lg:w-[76px]">
+      {result.map((value, i) => (
         <GameResultDot
           key={i}
           index={i}
           type={
-            typeof value !== 'undefined'
-              ? // @ts-expect-error toString produces any which is fine because we have a fallback
-                resultType[value.toString()]
-              : resultType[2]
+            // @ts-expect-error toString produces any which is fine because we have a fallback
+            resultType[value.toString()] ?? resultType[2]
           }
         />
       ))}
