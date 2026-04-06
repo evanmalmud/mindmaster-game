@@ -3,7 +3,7 @@ import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
 import { motion } from 'framer-motion';
 
-import { getUserStats } from '~/routes/_default.game/game.server';
+import { getUserStats } from '~/routes/_default.game/game.data';
 import { authenticator } from '~/services/auth.server';
 import { getStatsFromCookie } from '~/services/stats-cookie.server';
 

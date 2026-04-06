@@ -1,21 +1,27 @@
 /**
  * Ensures env vars are properly set for application to run. Should match what
  * is declared in .env.example.
+ *
+ * In mock mode (MOCK_DATA=true), defaults are provided so no .env file is needed.
  */
 import { z } from 'zod';
 
+const isMock = process.env.MOCK_DATA === 'true';
+
+const str = isMock ? z.string().default('mock-placeholder') : z.string();
+
 const envSchema = z.object({
-  ENCRYPTION_SECRET: z.string(),
-  GOOGLE_CALLBACK_URL: z.string(),
-  GOOGLE_CLIENT_ID: z.string(),
-  GOOGLE_CLIENT_SECRET: z.string(),
+  ENCRYPTION_SECRET: str,
+  GOOGLE_CALLBACK_URL: str,
+  GOOGLE_CLIENT_ID: str,
+  GOOGLE_CLIENT_SECRET: str,
   NODE_ENV: z.union([
     z.literal('production'),
     z.literal('development'),
     z.literal('test'),
   ]),
-  RESEND_API_KEY: z.string(),
-  SESSION_SECRET: z.string(),
+  RESEND_API_KEY: str,
+  SESSION_SECRET: str,
 });
 
 export const {

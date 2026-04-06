@@ -15,11 +15,11 @@ import {
   addGameSubmission,
   findOrCreateDailyGame,
   getGame,
-} from '~/routes/_default.game/game.server';
+} from '~/routes/_default.game/game.data';
 import type {
   ParsedGame,
   Submission,
-} from '~/routes/_default.game/game.server';
+} from '~/routes/_default.game/game.data';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await authenticator.isAuthenticated(request);
