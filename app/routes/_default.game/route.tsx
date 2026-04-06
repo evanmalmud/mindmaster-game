@@ -102,10 +102,8 @@ export default function Game() {
           </div>
 
           <Form method="post" className="flex w-full flex-col items-center gap-y-3">
-            <div className="w-full px-3 sm:px-4">
-              <motion.div
-                animate={{ scale: gameState.isGameOver ? 0.6 : 1 }}
-                transition={{ type: 'spring', stiffness: 80, damping: 15 }}
+            <div className={cn('w-full px-3 sm:px-4', gameState.isGameOver && 'origin-top transition-all duration-500')} style={gameState.isGameOver ? { transform: 'scale(0.55)', marginBottom: '-20%' } : undefined}>
+              <div
                 className="mx-auto flex max-w-lg flex-col gap-y-2 rounded-xl border border-solid border-neutral-600 bg-card p-2 text-card-foreground shadow sm:gap-y-3 sm:p-3 lg:gap-y-4 lg:p-4"
               >
                 <AnimatePresence>
@@ -113,7 +111,7 @@ export default function Game() {
                     <GameRow key={i} index={i} />
                   ))}
                 </AnimatePresence>
-              </motion.div>
+              </div>
             </div>
 
             {!gameState.isGameOver ? (
@@ -196,20 +194,20 @@ function WinLossFooter({
       initial={{ opacity: 0, y: 100 }}
       transition={{ type: 'spring', stiffness: 60, damping: 12 }}
     >
-      <div className="flex flex-col items-center justify-center gap-2 pb-4 -mt-4 sm:-mt-6">
+      <div className="flex flex-col items-center justify-center gap-3 pb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-center font-display text-4xl uppercase sm:text-5xl">
+          <h1 className="text-center font-display text-5xl uppercase sm:text-6xl">
             {decision}
           </h1>
           {solveTime != null && gameState.game.isWinner && (
-            <span className="font-mono text-base text-muted-foreground">
+            <span className="font-mono text-lg text-muted-foreground">
               {formatTime(solveTime)}
             </span>
           )}
         </div>
 
         {/* Answer reveal */}
-        <div className="flex flex-row gap-1.5">
+        <div className="flex flex-row gap-2">
           {gameState.game.code.code.map(
             (codeColor: number, i: Key | null | undefined) => (
               <WinLossAnswer key={i} colorIndex={codeColor} />
@@ -217,25 +215,25 @@ function WinLossFooter({
           )}
         </div>
 
-        {/* Action buttons */}
-        <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
+        {/* Action buttons — stacked on mobile, row on desktop */}
+        <div className="mt-1 flex w-full max-w-xs flex-col items-stretch gap-2 sm:max-w-none sm:flex-row sm:items-center sm:justify-center">
           <button
             type="button"
             onClick={handleShare}
-            className="font-matter rounded-3xl border-2 border-neutral-700 bg-code-green px-5 py-2 text-xs font-semibold sm:text-sm uppercase text-white shadow-input-idle transition-all duration-150 ease-in-out hover:translate-y-[-2px] hover:shadow-input-grow active:translate-y-[2px] active:shadow-input-shrink"
+            className="font-matter rounded-3xl border-2 border-neutral-700 bg-code-green px-6 py-3 text-sm font-semibold uppercase text-white shadow-input-idle transition-all duration-150 ease-in-out hover:translate-y-[-2px] hover:shadow-input-grow active:translate-y-[2px] active:shadow-input-shrink"
           >
             Share Result
           </button>
           <button
             type="button"
             onClick={handleShareImage}
-            className="font-matter rounded-3xl border-2 border-neutral-700 px-5 py-2 text-xs font-semibold sm:text-sm uppercase shadow-input-idle transition-all duration-150 ease-in-out hover:translate-y-[-2px] hover:shadow-input-grow active:translate-y-[2px] active:shadow-input-shrink"
+            className="font-matter rounded-3xl border-2 border-neutral-700 px-6 py-3 text-sm font-semibold uppercase shadow-input-idle transition-all duration-150 ease-in-out hover:translate-y-[-2px] hover:shadow-input-grow active:translate-y-[2px] active:shadow-input-shrink"
           >
             Share Image
           </button>
           <Link
             to="/stats"
-            className="font-matter rounded-3xl border-2 border-neutral-700 px-5 py-2 text-xs font-semibold sm:text-sm uppercase shadow-input-idle transition-all duration-150 ease-in-out hover:translate-y-[-2px] hover:shadow-input-grow active:translate-y-[2px] active:shadow-input-shrink"
+            className="font-matter rounded-3xl border-2 border-neutral-700 px-6 py-3 text-center text-sm font-semibold uppercase shadow-input-idle transition-all duration-150 ease-in-out hover:translate-y-[-2px] hover:shadow-input-grow active:translate-y-[2px] active:shadow-input-shrink"
           >
             View Stats
           </Link>
@@ -274,7 +272,7 @@ function WinLossAnswer({ colorIndex }: { colorIndex: number }) {
   return (
     <div
       className={cn(
-        'flex size-10 select-none items-center justify-center rounded-full border-2 border-neutral-700 shadow-input-idle sm:size-12 lg:size-16',
+        'flex size-12 select-none items-center justify-center rounded-full border-2 border-neutral-700 shadow-input-idle sm:size-14 lg:size-16',
         masterMindColors[colorIndex],
       )}
     >
