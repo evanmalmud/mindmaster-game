@@ -14,8 +14,8 @@ permissions:
   contents: read
 
 jobs:
-  lint:
-    name: ESLint
+  build:
+    name: Build & Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -34,59 +34,13 @@ jobs:
       - name: Lint
         run: npm run lint
 
-  typecheck:
-    name: TypeScript
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          cache: npm
-          cache-dependency-path: ./package.json
-          node-version: 22
-
-      - name: Install deps
-        run: npm install
-
       - name: Type check
         run: npm run typecheck --if-present
 
-  vitest:
-    name: Vitest
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          cache: npm
-          cache-dependency-path: ./package.json
-          node-version: 22
-
-      - name: Install deps
-        run: npm install
-
-      - name: Run vitest
+      - name: Test
         run: npm run test -- --coverage
 
-  # Notify self-hosted server to pull and rebuild after checks pass.
-  # Set DEPLOY_WEBHOOK_URL in repo secrets to enable.
-  # Example: a simple script on your server that runs `git pull && docker compose up --build -d`
-  deploy:
-    name: Deploy
-    runs-on: ubuntu-latest
-    needs: [lint, typecheck]
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    steps:
-      - name: Trigger deploy webhook
-        if: ${{ secrets.DEPLOY_WEBHOOK_URL != '' }}
-        run: |
-          curl -sf -X POST \
-            -H "Authorization: Bearer ${{ secrets.DEPLOY_WEBHOOK_SECRET }}" \
-            "${{ secrets.DEPLOY_WEBHOOK_URL }}" \
-            || echo "Webhook not configured or failed — deploy manually"
+      - name: Build
+        run: npm run build
+        env:
+          MOCK_DATA: "true"
