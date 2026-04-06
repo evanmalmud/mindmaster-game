@@ -61,10 +61,8 @@ export async function findOrCreateDailyGame(userId?: string) {
   const puzzleDate = getPuzzleDate();
 
   if (userId) {
-    const existing = await db.game.findUnique({
-      where: {
-        userId_puzzleDate: { userId, puzzleDate },
-      },
+    const existing = await db.game.findFirst({
+      where: { userId, puzzleDate },
       include: { code: true },
     });
 

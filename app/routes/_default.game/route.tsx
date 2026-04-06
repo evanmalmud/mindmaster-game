@@ -83,7 +83,7 @@ export default function Game() {
       <div className="flex min-h-dvh flex-col">
         <main className="flex flex-auto flex-col items-center md:justify-center">
           {/* Daily puzzle header + timer */}
-          <div className="flex items-center justify-center gap-4 py-3">
+          <div className="flex items-center justify-center gap-4 py-1.5">
             <span className="font-display text-sm uppercase tracking-wider text-muted-foreground">
               Daily #{loaderData.puzzleNumber}
             </span>
@@ -101,7 +101,7 @@ export default function Game() {
             </button>
           </div>
 
-          <Form method="post" className="flex w-full flex-col items-center gap-y-6">
+          <Form method="post" className="flex w-full flex-col items-center gap-y-3">
             <div className="w-full px-3 sm:px-4">
               <motion.div
                 animate={{ scale: gameState.isGameOver ? 0.6 : 1 }}
@@ -196,7 +196,7 @@ function WinLossFooter({
       initial={{ opacity: 0, y: 100 }}
       transition={{ type: 'spring', stiffness: 60, damping: 12 }}
     >
-      <div className="flex flex-col items-center justify-center gap-2 pb-4 pt-2">
+      <div className="flex flex-col items-center justify-center gap-2 pb-4 -mt-4 sm:-mt-6">
         <div className="flex items-center gap-3">
           <h1 className="text-center font-display text-4xl uppercase sm:text-5xl">
             {decision}
