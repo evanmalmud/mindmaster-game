@@ -61,17 +61,24 @@ export async function findOrCreateDailyGame(userId?: string) {
   const puzzleDate = getPuzzleDate();
 
   if (userId) {
-    const existing = await db.game.findFirst({
-      where: { userId, puzzleDate },
-      include: { code: true },
-    });
+    // Verify user still exists (session may reference a user from a different DB)
+    const userExists = await db.user.findUnique({ where: { id: userId } });
+    if (userExists) {
+      const existing = await db.game.findFirst({
+        where: { userId, puzzleDate },
+        include: { code: true },
+      });
 
-    if (existing) {
-      return toParsedGame(existing);
+      if (existing) {
+        return toParsedGame(existing);
+      }
+
+      return createDailyGame(puzzleDate, userId);
     }
   }
 
-  return createDailyGame(puzzleDate, userId);
+  // Anonymous game (no userId)
+  return createDailyGame(puzzleDate);
 }
 
 async function createDailyGame(puzzleDate: string, userId?: string) {
