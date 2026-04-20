@@ -31,9 +31,9 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: "postgres://postgres:postgres@db:5432/mind_master"
-      SESSION_SECRET: "local-dev-session-secret-change-in-production"
-      ENCRYPTION_SECRET: "local-dev-encryption-secret-min-length"
-      RESEND_API_KEY: "re_placeholder_local_dev"
+      SESSION_SECRET: "${SESSION_SECRET:local-dev-session-secret-change-in-production}"
+      ENCRYPTION_SECRET: "${ENCRYPTION_SECRET:local-dev-encryption-secret-min-length}"
+      RESEND_API_KEY: "${RESEND_API_KEY:re_placeholder_local_dev}"
       GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-placeholder}"
       GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-placeholder}"
       GOOGLE_CALLBACK_URL: "${GOOGLE_CALLBACK_URL:-https://mindmaster.sleepydonut.com/api/auth/callback/google}"

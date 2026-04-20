@@ -1,19 +1,15 @@
 import type { User } from '@prisma/client';
 import { Authenticator } from 'remix-auth';
 import { GoogleStrategy } from 'remix-auth-google';
-import { TOTPStrategy } from 'remix-auth-totp';
 
 import {
-  ENCRYPTION_SECRET,
   GOOGLE_CALLBACK_URL,
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
 } from '~/config/env.server';
-import { generateFromEmail } from '~/lib/random-username';
 import { sessionStorage } from '~/services/session.server';
 
 import { db } from './db.server';
-import { sendAuthEmail } from './email.server';
 
 export const authenticator = new Authenticator<User>(sessionStorage);
 
@@ -43,27 +39,3 @@ const googleStrategy = new GoogleStrategy(
 );
 
 authenticator.use(googleStrategy);
-
-authenticator.use(
-  new TOTPStrategy(
-    {
-      secret: ENCRYPTION_SECRET,
-      sendTOTP: async ({ email, code, magicLink }) => {
-        await sendAuthEmail({ email, code, magicLink });
-      },
-    },
-    async ({ email }) => {
-      let user = await db.user.findFirst({
-        where: { email },
-      });
-
-      if (!user) {
-        user = await db.user.create({
-          data: { email, name: generateFromEmail(email) },
-        });
-      }
-
-      return user;
-    },
-  ),
-);
