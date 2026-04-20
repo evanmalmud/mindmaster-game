@@ -1,7 +1,7 @@
 import type { ShouldRevalidateFunctionArgs } from '@remix-run/react';
 import { Form, Link } from '@remix-run/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Key, useEffect, useRef, useState } from 'react';
+import { Key, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { Confetti } from '~/components/confetti';
 import { Toaster } from '~/components/ui/toaster';
@@ -34,6 +34,12 @@ export function shouldRevalidate({
   return defaultShouldRevalidate;
 }
 
+// Mild scale-down on game over so vertical movement stays small and stable
+// across viewport widths. Margin-bottom is calculated at runtime to cancel
+// the layout space that the transform doesn't reclaim.
+const BOARD_END_SCALE = 0.85;
+const BOARD_END_GAP_PX = 24;
+
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
@@ -65,6 +71,54 @@ export default function Game() {
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const elapsed = useTimer(gameState.isGameOver);
 
+  const mainRef = useRef<HTMLElement>(null);
+  const boardWrapRef = useRef<HTMLDivElement>(null);
+  const [{ boardScale, boardCollapsePx }, setBoardFit] = useState({
+    boardScale: 1,
+    boardCollapsePx: 0,
+  });
+
+  // Scale the board to fit the viewport and compensate for the CSS transform
+  // not affecting layout. When the game ends we also apply BOARD_END_SCALE as
+  // a ceiling. Re-runs on game state changes and window resize.
+  useLayoutEffect(() => {
+    const compute = () => {
+      const main = mainRef.current;
+      const board = boardWrapRef.current;
+      if (!main || !board) return;
+
+      const endScale = gameState.isGameOver ? BOARD_END_SCALE : 1;
+      const endGap = gameState.isGameOver ? BOARD_END_GAP_PX : 0;
+
+      // offsetHeight is pre-transform and reflects the unscaled layout height.
+      // Sum only the non-board siblings of main; don't use (mainNatural -
+      // boardNatural) because `form`'s layout height already includes the
+      // marginBottom we applied on the previous pass, which would make the
+      // scale self-reinforcing instead of converging.
+      const boardNatural = board.offsetHeight;
+      const nonBoardNatural = [...main.children].reduce((sum, el) => {
+        const h = (el as HTMLElement).offsetHeight;
+        return el.contains(board) ? sum : sum + h;
+      }, 0);
+      // Reserve endGap so the scaled board doesn't end flush against the
+      // end-game footer (LOSS/WINNER heading). Reserving here means the fit
+      // scale shrinks a touch more on tight viewports instead of introducing
+      // overflow.
+      const available = main.clientHeight - nonBoardNatural - endGap;
+
+      const fitScale = boardNatural > 0 ? available / boardNatural : 1;
+      const scale = Math.min(endScale, fitScale, 1);
+      setBoardFit({
+        boardScale: scale,
+        boardCollapsePx: -boardNatural * (1 - scale) + endGap,
+      });
+    };
+
+    compute();
+    window.addEventListener('resize', compute);
+    return () => window.removeEventListener('resize', compute);
+  }, [gameState.isGameOver, gameState.game.submissions.length]);
+
   useEffect(() => {
     if (actionData && !actionData?.ok) {
       toast({
@@ -80,8 +134,11 @@ export default function Game() {
     <>
       {gameState.isGameOver && gameState.game.isWinner && <Confetti />}
 
-      <div className="flex min-h-dvh flex-col">
-        <main className="flex flex-auto flex-col items-center md:justify-center">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <main
+          ref={mainRef}
+          className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden"
+        >
           {/* Daily puzzle header + timer */}
           <div className="flex items-center justify-center gap-4 py-1.5">
             <span className="font-display text-sm uppercase tracking-wider text-muted-foreground">
@@ -102,7 +159,18 @@ export default function Game() {
           </div>
 
           <Form method="post" className="flex w-full flex-col items-center gap-y-3">
-            <div className={cn('w-full px-3 sm:px-4', gameState.isGameOver && 'origin-top transition-all duration-500')} style={gameState.isGameOver ? { transform: 'scale(0.55)', marginBottom: '-20%' } : undefined}>
+            <div
+              ref={boardWrapRef}
+              className={cn(
+                'w-full px-3 sm:px-4 origin-top',
+                gameState.isGameOver && 'transition-all duration-500',
+              )}
+              style={
+                boardScale < 1
+                  ? { transform: `scale(${boardScale})`, marginBottom: boardCollapsePx }
+                  : undefined
+              }
+            >
               <div
                 className="mx-auto flex max-w-lg flex-col gap-y-2 rounded-xl border border-solid border-neutral-600 bg-card p-2 text-card-foreground shadow sm:gap-y-3 sm:p-3 lg:gap-y-4 lg:p-4"
               >

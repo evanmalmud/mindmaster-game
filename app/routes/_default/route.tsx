@@ -16,10 +16,12 @@ export default function AppLayout() {
   const { user } = useLoaderData<typeof loader>();
 
   return (
-    <>
+    <div className="flex h-dvh flex-col overflow-hidden">
       <Header user={user} />
 
-      <Outlet />
-    </>
+      <div className="flex min-h-0 flex-1 flex-col">
+        <Outlet />
+      </div>
+    </div>
   );
 }

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(npx prisma *)",
+      "Bash(DATABASE_URL=\"postgresql://user:pass@localhost:5432/placeholder\" npx prisma generate --config=prisma/prisma.config.ts)",
+      "Bash(MOCK_DATA=true DATABASE_URL=\"postgresql://user:pass@localhost:5432/placeholder\" npx prisma generate --config=prisma/prisma.config.ts)",
+      "Bash(DATABASE_URL=\"postgresql://user:pass@localhost:5432/placeholder\" npx -y prisma@7.6.0 generate --config=prisma/prisma.config.ts)",
+      "Bash(npm install *)",
+      "Bash(MOCK_DATA=true npm run dev)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_console_messages",
+      "mcp__plugin_playwright_playwright__browser_close",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "mcp__plugin_playwright_playwright__browser_resize",
+      "Bash(npm run *)"
+    ]
+  }
+}
