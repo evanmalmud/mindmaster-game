@@ -1,7 +1,7 @@
 import { createDailyCode, getPuzzleDate } from '../../lib/code';
 
 import { RESULT_MAP, calculateResult } from './game';
-import type { ParsedGame, Submission } from './game.server';
+import type { ParsedGame } from './game.server';
 
 /**
  * In-memory game store for dev without a database.

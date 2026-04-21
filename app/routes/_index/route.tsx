@@ -38,7 +38,7 @@ export default function Index() {
             animate={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 100 }}
             transition={{ duration: 0.5 }}
-            className="font-display text-6xl uppercase"
+            className="font-display cursor-default select-none text-6xl uppercase"
           >
             MindMaster
           </motion.h1>

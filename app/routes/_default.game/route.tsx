@@ -1,5 +1,5 @@
 import type { ShouldRevalidateFunctionArgs } from '@remix-run/react';
-import { Form, Link } from '@remix-run/react';
+import { Form, Link, useLocation } from '@remix-run/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Key, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
@@ -68,7 +68,15 @@ export default function Game() {
   const loaderData = useGameRouteLoader();
   const { toast } = useToast();
   const actionData = useGameRouteAction();
-  const [showHowToPlay, setShowHowToPlay] = useState(false);
+  // Open the modal automatically when the user navigates here from the
+  // landing page's "How To Play" button (which passes Link state).
+  const location = useLocation();
+  const initialHowToPlay =
+    typeof location.state === 'object' &&
+    location.state !== null &&
+    'howToPlay' in location.state &&
+    location.state.howToPlay === true;
+  const [showHowToPlay, setShowHowToPlay] = useState(initialHowToPlay);
   const elapsed = useTimer(gameState.isGameOver);
 
   const mainRef = useRef<HTMLElement>(null);
@@ -82,7 +90,7 @@ export default function Game() {
   // not affecting layout. When the game ends we also apply BOARD_END_SCALE as
   // a ceiling. Re-runs on game state changes and window resize.
   useLayoutEffect(() => {
-    const compute = () => {
+    function compute() {
       const main = mainRef.current;
       const board = boardWrapRef.current;
       if (!main || !board) return;
@@ -112,7 +120,7 @@ export default function Game() {
         boardScale: scale,
         boardCollapsePx: -boardNatural * (1 - scale) + endGap,
       });
-    };
+    }
 
     compute();
     window.addEventListener('resize', compute);

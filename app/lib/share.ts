@@ -1,9 +1,12 @@
 import type { Submission } from '~/routes/_default.game/game.server';
 
+// Avoid emojis added after Unicode 12 (2019) so every recipient renders the
+// share text the same way. 🩶 (gray heart, Unicode 15) was falling back to
+// red hearts or tofu on older iOS/Android.
 const RESULT_EMOJI: Record<number, string> = {
-  1: '🟢',   // correct color and spot
-  0: '🟡',   // correct color
-  '-1': '🩶', // incorrect
+  1: '🟢',   // correct color and spot — Unicode 12
+  0: '🟡',   // correct color — Unicode 12
+  '-1': '⚫', // incorrect — Unicode 4.1, supported everywhere
 };
 
 const RESULT_EMOJI_COLORBLIND: Record<number, string> = {
@@ -26,7 +29,7 @@ export function generateShareText(
   submissions: Submission[],
   isWinner: boolean,
   maxGuesses: number,
-  colorblind: boolean = false,
+  colorblind = false,
   solveTime?: number,
 ): string {
   const emoji = colorblind ? RESULT_EMOJI_COLORBLIND : RESULT_EMOJI;
@@ -137,7 +140,7 @@ export async function shareResult(
   submissions: Submission[],
   isWinner: boolean,
   maxGuesses: number,
-  colorblind: boolean = false,
+  colorblind = false,
   solveTime?: number,
 ): Promise<'copied' | 'shared'> {
   const text = generateShareText(puzzleNumber, submissions, isWinner, maxGuesses, colorblind, solveTime);

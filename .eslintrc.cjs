@@ -47,6 +47,10 @@ module.exports = {
           typescript: {},
         },
       },
+      rules: {
+        // TypeScript handles prop validation; runtime PropTypes are redundant.
+        'react/prop-types': 'off',
+      },
     },
 
     // Typescript
@@ -73,6 +77,10 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+        ],
         'func-style': ['error', 'declaration'],
         'import/order': [
           'error',

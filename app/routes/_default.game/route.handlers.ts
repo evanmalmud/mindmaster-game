@@ -4,6 +4,12 @@ import { useActionData, useLoaderData } from '@remix-run/react';
 import { z } from 'zod';
 
 import { getPuzzleDate, getPuzzleNumber } from '~/lib/code';
+import {
+  addGameSubmission,
+  findOrCreateDailyGame,
+  getGame,
+} from '~/routes/_default.game/game.data';
+import type { ParsedGame } from '~/routes/_default.game/game.data';
 import { authenticator } from '~/services/auth.server';
 import {
   getStatsFromCookie,
@@ -11,15 +17,6 @@ import {
   updateCookieStatsAfterGame,
 } from '~/services/stats-cookie.server';
 
-import {
-  addGameSubmission,
-  findOrCreateDailyGame,
-  getGame,
-} from '~/routes/_default.game/game.data';
-import type {
-  ParsedGame,
-  Submission,
-} from '~/routes/_default.game/game.data';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await authenticator.isAuthenticated(request);

@@ -16,11 +16,17 @@ type ThemeContextType = {
   toggleColorblind: () => void;
 };
 
+// Defaults throw if consumed without ThemeProvider — this surfaces a real bug
+// rather than silently no-op'ing a toggle.
+function noProvider() {
+  throw new Error('useTheme must be used within ThemeProvider');
+}
+
 const ThemeContext = createContext<ThemeContextType>({
   theme: 'dark',
   colorblind: false,
-  toggleTheme: () => {},
-  toggleColorblind: () => {},
+  toggleTheme: noProvider,
+  toggleColorblind: noProvider,
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

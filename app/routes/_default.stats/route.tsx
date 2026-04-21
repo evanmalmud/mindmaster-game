@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import { Link, useLoaderData } from '@remix-run/react';
+import { Form, Link, useLoaderData } from '@remix-run/react';
 import { motion } from 'framer-motion';
 
 import { getUserStats } from '~/routes/_default.game/game.data';
@@ -71,9 +71,11 @@ export default function Stats() {
             className="mt-4 rounded-lg border border-code-yellow/40 bg-code-yellow/10 p-3 text-center"
           >
             <p className="text-sm text-foreground/80">
-              <Link to="/login" className="font-semibold underline">
-                Log in
-              </Link>{' '}
+              <Form action="/api/auth/google" method="post" className="inline">
+                <button type="submit" className="font-semibold underline">
+                  Log in
+                </button>
+              </Form>{' '}
               to save your stats permanently across devices.
             </p>
           </motion.div>
