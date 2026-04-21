@@ -1,5 +1,6 @@
 import { cssBundleHref } from '@remix-run/css-bundle';
-import type { LinksFunction } from '@remix-run/node';
+import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
+import { json } from '@remix-run/node';
 import {
   Links,
   LiveReload,
@@ -7,9 +8,10 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from '@remix-run/react';
 
-import { ThemeProvider } from '~/lib/theme';
+import { ThemeProvider, parseThemePrefsFromCookie } from '~/lib/theme';
 import styles from '~/tailwind.css';
 
 export function links(): ReturnType<LinksFunction> {
@@ -26,9 +28,16 @@ export function links(): ReturnType<LinksFunction> {
   ];
 }
 
+export function loader({ request }: LoaderFunctionArgs) {
+  const prefs = parseThemePrefsFromCookie(request.headers.get('Cookie'));
+  return json(prefs);
+}
+
 export default function App() {
+  const { theme, colorblind } = useLoaderData<typeof loader>();
+
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={theme}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -36,7 +45,7 @@ export default function App() {
         <Links />
       </head>
       <body className="bg-background text-foreground transition-colors duration-200">
-        <ThemeProvider>
+        <ThemeProvider initialTheme={theme} initialColorblind={colorblind}>
           <Outlet />
         </ThemeProvider>
         <ScrollRestoration />
