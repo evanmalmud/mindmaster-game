@@ -3,6 +3,13 @@ import { Form, Link, useLocation } from '@remix-run/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Key, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
+// useLayoutEffect warns in SSR because its effect can't be encoded into the
+// server-rendered HTML. Using useEffect on the server (which React ignores
+// during SSR anyway) silences the warning, while keeping the synchronous
+// pre-paint behavior on the client where it matters for fit-scale.
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
 import { Confetti } from '~/components/confetti';
 import { Toaster } from '~/components/ui/toaster';
 import { useToast } from '~/components/ui/use-toast';
@@ -46,14 +53,37 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-function useTimer(isGameOver: boolean) {
+function timerKey(gameId: number) {
+  return `mindmaster-timer-${gameId}`;
+}
+
+function useTimer(gameId: number, isGameOver: boolean) {
   const [elapsed, setElapsed] = useState(0);
-  const startTime = useRef(Date.now());
+  const startTime = useRef<number | null>(null);
+
+  // Resolve the start time from localStorage (if this game was already
+  // in progress before refresh) or stamp a new one. Keyed by gameId so a
+  // brand-new game always gets a fresh counter.
+  useEffect(() => {
+    const key = timerKey(gameId);
+    let start: number;
+    const stored = localStorage.getItem(key);
+    const parsed = stored === null ? NaN : Number(stored);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      start = parsed;
+    } else {
+      start = Date.now();
+      localStorage.setItem(key, String(start));
+    }
+    startTime.current = start;
+    setElapsed(Math.floor((Date.now() - start) / 1000));
+  }, [gameId]);
 
   useEffect(() => {
     if (isGameOver) return;
 
     const interval = setInterval(() => {
+      if (startTime.current == null) return;
       setElapsed(Math.floor((Date.now() - startTime.current) / 1000));
     }, 1000);
 
@@ -77,7 +107,16 @@ export default function Game() {
     'howToPlay' in location.state &&
     location.state.howToPlay === true;
   const [showHowToPlay, setShowHowToPlay] = useState(initialHowToPlay);
-  const elapsed = useTimer(gameState.isGameOver);
+  const elapsed = useTimer(gameState.game.id, gameState.isGameOver);
+
+  // Scrub the location state on first mount so a page refresh (which keeps
+  // history state intact) doesn't re-trigger the modal.
+  useEffect(() => {
+    if (initialHowToPlay) {
+      window.history.replaceState({}, '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const mainRef = useRef<HTMLElement>(null);
   const boardWrapRef = useRef<HTMLDivElement>(null);
@@ -89,7 +128,7 @@ export default function Game() {
   // Scale the board to fit the viewport and compensate for the CSS transform
   // not affecting layout. When the game ends we also apply BOARD_END_SCALE as
   // a ceiling. Re-runs on game state changes and window resize.
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     function compute() {
       const main = mainRef.current;
       const board = boardWrapRef.current;
