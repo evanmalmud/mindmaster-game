@@ -11,13 +11,6 @@ import { Header } from '../_default/header';
 
 import { Subtitle } from './subtitle';
 
-export function meta() {
-  return [
-    { title: 'MindMaster' },
-    { name: 'description', content: 'Break the code...' },
-  ];
-}
-
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await authenticator.isAuthenticated(request);
   const puzzleNumber = getPuzzleNumber(getPuzzleDate());

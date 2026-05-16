@@ -19,7 +19,7 @@ function createMockGame(puzzleDate: string): ParsedGame {
     isWinner: false,
     submissions: [],
     puzzleDate,
-    createdAt: new Date() as unknown as string,
+    createdAt: new Date(),
     codeId: id,
     code: { id, code },
     userId: null,
