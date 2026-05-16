@@ -10,6 +10,7 @@
     "dev": "remix dev --manual",
     "format": "prettier --write .",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
+    "postinstall": "prisma generate",
     "start": "remix-serve ./build/index.js",
     "test": "vitest",
     "typecheck": "tsc"
@@ -64,7 +65,7 @@
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^8.58.2",
     "@vitejs/plugin-react": "^4.2.1",
-    "@vitest/coverage-v8": "^1.2.1",
+    "@vitest/coverage-v8": "^4.1.6",
     "autoprefixer": "^10.4.17",
     "concurrently": "^8.2.2",
     "eslint": "^8.38.0",
