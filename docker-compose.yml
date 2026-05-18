@@ -35,6 +35,7 @@ services:
       GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-placeholder}"
       GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-placeholder}"
       GOOGLE_CALLBACK_URL: "${GOOGLE_CALLBACK_URL:-https://mindmaster.sleepydonut.com/api/auth/callback/google}"
+      PUBLIC_URL: "${PUBLIC_URL:-https://mindmaster.sleepydonut.com}"
       NODE_ENV: "production"
     networks:
       - mindmaster-network
