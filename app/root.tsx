@@ -48,8 +48,7 @@ function getPublicOrigin(request: Request): string {
 
 export function meta({ data }: { data: { origin: string } | undefined }) {
   const origin = data?.origin ?? '';
-  const gif = `${origin}/og-image.gif`;
-  const png = `${origin}/og-image.png`;
+  const image = `${origin}/og-image.gif`;
   const title = 'MindMaster';
   const description = 'Break the code. A daily colour-guessing puzzle.';
   const imageAlt = 'MindMaster — break the code';
@@ -59,7 +58,7 @@ export function meta({ data }: { data: { origin: string } | undefined }) {
     { property: 'og:type', content: 'website' },
     { property: 'og:title', content: title },
     { property: 'og:description', content: description },
-    { property: 'og:image', content: gif },
+    { property: 'og:image', content: image },
     { property: 'og:image:type', content: 'image/gif' },
     { property: 'og:image:width', content: '1200' },
     { property: 'og:image:height', content: '1200' },
@@ -67,7 +66,7 @@ export function meta({ data }: { data: { origin: string } | undefined }) {
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:title', content: title },
     { name: 'twitter:description', content: description },
-    { name: 'twitter:image', content: png },
+    { name: 'twitter:image', content: image },
   ];
 }
 
