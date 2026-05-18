@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import { Link, useLoaderData } from '@remix-run/react';
+import { Link, useLoaderData, useSearchParams } from '@remix-run/react';
 import { motion } from 'framer-motion';
 import type { ComponentProps } from 'react';
 
@@ -20,13 +20,27 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Index() {
   const { user, puzzleNumber } = useLoaderData<typeof loader>();
+  const [searchParams] = useSearchParams();
+  const preview = searchParams.get('preview') === '1';
 
   return (
     <>
-      {user ? <Header user={user} /> : null}
+      {user && !preview ? <Header user={user} /> : null}
 
-      <main className="flex flex-col items-center justify-center pt-20 lg:pt-40">
-        <div className="flex w-full max-w-md flex-col items-center lg:max-w-lg">
+      <main
+        className={
+          preview
+            ? 'flex min-h-screen flex-col items-center justify-center'
+            : 'flex flex-col items-center justify-center pt-20 lg:pt-40'
+        }
+      >
+        <div
+          className={
+            preview
+              ? 'flex w-full flex-col items-center scale-[2]'
+              : 'flex w-full max-w-md flex-col items-center lg:max-w-lg'
+          }
+        >
           <motion.h1
             animate={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 100 }}
@@ -38,56 +52,60 @@ export default function Index() {
 
           <Subtitle />
 
-          <motion.p
-            animate={{ opacity: 1 }}
-            initial={{ opacity: 0 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            className="mt-6 text-sm text-muted-foreground"
-          >
-            Daily Puzzle #{puzzleNumber}
-          </motion.p>
+          {preview ? null : (
+            <>
+              <motion.p
+                animate={{ opacity: 1 }}
+                initial={{ opacity: 0 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+                className="mt-6 text-sm text-muted-foreground"
+              >
+                Daily Puzzle #{puzzleNumber}
+              </motion.p>
 
-          <div className="mt-10 grid grid-cols-1 items-center gap-6 lg:grid-cols-3">
-            <motion.div
-              animate={{ opacity: 1, y: 0 }}
-              initial={{ opacity: 0, y: 100 }}
-              transition={{
-                type: 'spring',
-                mass: 2,
-                stiffness: 100,
-              }}
-            >
-              <Button to={'/game'} state={{ howToPlay: true }}>
-                How To Play
-              </Button>
-            </motion.div>
-            <motion.div
-              animate={{ opacity: 1, y: 0 }}
-              initial={{ opacity: 0, y: 100 }}
-              transition={{
-                delay: 0.2,
-                type: 'spring',
-                mass: 2,
-                stiffness: 100,
-              }}
-            >
-              <Button to={'/stats'}>View Stats</Button>
-            </motion.div>
-            <motion.div
-              animate={{ opacity: 1, y: 0 }}
-              initial={{ opacity: 0, y: 100 }}
-              transition={{
-                delay: 0.4,
-                type: 'spring',
-                mass: 2,
-                stiffness: 100,
-              }}
-            >
-              <Button to={'/game'} state={{ howToPlay: false }}>
-                Play
-              </Button>
-            </motion.div>
-          </div>
+              <div className="mt-10 grid grid-cols-1 items-center gap-6 lg:grid-cols-3">
+                <motion.div
+                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 100 }}
+                  transition={{
+                    type: 'spring',
+                    mass: 2,
+                    stiffness: 100,
+                  }}
+                >
+                  <Button to={'/game'} state={{ howToPlay: true }}>
+                    How To Play
+                  </Button>
+                </motion.div>
+                <motion.div
+                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 100 }}
+                  transition={{
+                    delay: 0.2,
+                    type: 'spring',
+                    mass: 2,
+                    stiffness: 100,
+                  }}
+                >
+                  <Button to={'/stats'}>View Stats</Button>
+                </motion.div>
+                <motion.div
+                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 100 }}
+                  transition={{
+                    delay: 0.4,
+                    type: 'spring',
+                    mass: 2,
+                    stiffness: 100,
+                  }}
+                >
+                  <Button to={'/game'} state={{ howToPlay: false }}>
+                    Play
+                  </Button>
+                </motion.div>
+              </div>
+            </>
+          )}
         </div>
       </main>
     </>
