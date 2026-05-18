@@ -14,7 +14,7 @@ WORKDIR /app
 
 # Install node modules
 ADD package.json package-lock.json .npmrc ./
-RUN npm install --include=dev
+RUN npm install --include=dev --ignore-scripts
 
 # Setup production node_modules
 FROM base as production-deps
