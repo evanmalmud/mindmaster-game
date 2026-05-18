@@ -1,3 +1,4 @@
+import { useSearchParams } from '@remix-run/react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
@@ -24,6 +25,8 @@ const subtitleColors = [
 ];
 
 export function Subtitle() {
+  const [searchParams] = useSearchParams();
+  const previewLoop = searchParams.get('preview') === '1';
   const [subtitleIndex, setSubtitleIndex] = useState(0);
   const subtitle = subtitlePhrases[subtitleIndex];
 
@@ -51,7 +54,7 @@ export function Subtitle() {
                   transition={{
                     delay: 0.75 + letterIdx * 0.1,
                     duration: 0.75,
-                    repeat: subtitleIndex ? 0 : 1,
+                    repeat: subtitleIndex && !previewLoop ? 0 : 1,
                     repeatDelay: 2,
                     repeatType: 'reverse',
                   }}
@@ -61,7 +64,12 @@ export function Subtitle() {
                     transformStyle: 'preserve-3d',
                   }}
                   onAnimationComplete={
-                    isLastLetter ? () => setSubtitleIndex(1) : undefined
+                    isLastLetter
+                      ? () =>
+                          setSubtitleIndex((prev) =>
+                            previewLoop ? (prev === 0 ? 1 : 0) : 1,
+                          )
+                      : undefined
                   }
                   className={`flex h-6 w-6 items-center justify-center rounded-full font-display uppercase ${subtitleColors[letterIdx % subtitleColors.length]}`}
                 >
