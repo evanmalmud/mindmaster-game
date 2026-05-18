@@ -71,6 +71,18 @@ npm run db:migrate  -- <migration_name>
 
 This means **any `npm install` step that runs before `prisma/schema.prisma` is in place will fail**. In particular, the Dockerfile's `deps` stage installs dependencies before copying `prisma/`, so it must use `npm install --ignore-scripts`. The `build` stage runs `npx prisma generate` explicitly after `ADD prisma prisma`. Keep that split when editing the Dockerfile.
 
+## Social share / OG image URL
+
+Open Graph requires absolute URLs (Discord, Twitter, etc. reject relative or `http://` `og:image` values). Behind a reverse proxy that terminates TLS upstream (Cloudflare → Traefik on `web`, etc.), the container only sees HTTP and a possibly internal `Host`, so `request.url` is the wrong origin.
+
+Set `PUBLIC_URL` to the public canonical origin (no trailing slash):
+
+```
+PUBLIC_URL=https://mindmaster.sleepydonut.com
+```
+
+If `PUBLIC_URL` is unset the root loader falls back to `x-forwarded-proto` / `x-forwarded-host` headers, then to `request.url`. `docker-compose.yml` already sets a sensible default.
+
 ## Google Auth
 
 https://console.cloud.google.com/apis/credentials?project=plotpoints

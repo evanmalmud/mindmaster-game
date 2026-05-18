@@ -31,8 +31,19 @@ export function links(): ReturnType<LinksFunction> {
 
 export function loader({ request }: LoaderFunctionArgs) {
   const prefs = parseThemePrefsFromCookie(request.headers.get('Cookie'));
+  return json({ ...prefs, origin: getPublicOrigin(request) });
+}
+
+function getPublicOrigin(request: Request): string {
+  if (process.env.PUBLIC_URL) {
+    return process.env.PUBLIC_URL.replace(/\/+$/, '');
+  }
+  const forwardedProto = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim();
+  const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim();
   const url = new URL(request.url);
-  return json({ ...prefs, origin: url.origin });
+  const proto = forwardedProto ?? url.protocol.replace(':', '');
+  const host = forwardedHost ?? request.headers.get('host') ?? url.host;
+  return `${proto}://${host}`;
 }
 
 export function meta({ data }: { data: { origin: string } | undefined }) {
