@@ -65,6 +65,12 @@ To create a new migration run
 npm run db:migrate  -- <migration_name>
 ```
 
+### Gotcha: `postinstall` runs `prisma generate`
+
+`package.json` has `"postinstall": "prisma generate"` so CI's `npm install` regenerates the Prisma client (otherwise typecheck fails with `Module '"@prisma/client"' has no exported member 'PrismaClient'/'User'/...`).
+
+This means **any `npm install` step that runs before `prisma/schema.prisma` is in place will fail**. In particular, the Dockerfile's `deps` stage installs dependencies before copying `prisma/`, so it must use `npm install --ignore-scripts`. The `build` stage runs `npx prisma generate` explicitly after `ADD prisma prisma`. Keep that split when editing the Dockerfile.
+
 ## Google Auth
 
 https://console.cloud.google.com/apis/credentials?project=plotpoints
